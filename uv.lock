@@ -430,12 +430,14 @@ source = { virtual = "." }
 dependencies = [
     { name = "ell-ai", extra = ["all"] },
     { name = "openai" },
+    { name = "python-dotenv" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "ell-ai", extras = ["all"], specifier = ">=0.0.13" },
     { name = "openai", specifier = ">=1.51.0" },
+    { name = "python-dotenv" },
 ]
 
 [[package]]
