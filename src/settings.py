@@ -2,7 +2,6 @@ import os
 from datetime import datetime
 
 import anthropic
-import ell
 import openai
 from dotenv import load_dotenv
 
