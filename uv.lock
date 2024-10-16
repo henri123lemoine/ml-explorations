@@ -612,6 +612,7 @@ name = "llm-explorations"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "anthropic" },
     { name = "ell-ai", extra = ["all"] },
     { name = "ipykernel" },
     { name = "openai" },
@@ -620,6 +621,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "anthropic", specifier = ">=0.34.2" },
     { name = "ell-ai", extras = ["all"], specifier = ">=0.0.14" },
     { name = "ipykernel", specifier = ">=6.29.5" },
     { name = "openai", specifier = ">=1.51.2" },
