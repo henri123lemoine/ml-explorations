@@ -63,3 +63,7 @@ class QwenModel(BaseModel):
 
     def train(self, training_data: Any, training_config: dict[str, Any]):
         raise NotImplementedError("Training not implemented for Qwen model yet")
+
+    def save(self, save_path: str):
+        self.model.save_pretrained(save_path)
+        self.tokenizer.save_pretrained(save_path)
