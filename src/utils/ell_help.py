@@ -20,20 +20,29 @@ def hello_chatty(name: str):
 
 
 @ell.simple(model="claude-3-5-sonnet-20240620", client=ANTHROPIC_CLIENT, max_tokens=8192)
-def hello_claude(world: str):
+def hello_claude(name: str):
     """You are a helpful assistant"""
-    name = world.capitalize()
+    name = name.capitalize()
     return f"Say hello to {name}!"
+
+
+@ell.simple(model="o1-mini", client=OPENAI_CLIENT)
+def do_math_o1_mini(math: str):
+    return f"Do some math: {math}"
 
 
 def main():
     name = "henri"
+    math = "1274198 * 1283"
 
     result = hello_chatty(name)
     print(f"Chatty result: {result}")
 
     result = hello_claude(name)
     print(f"Claude result: {result}")
+
+    result = do_math_o1_mini(math)
+    print(f"O1 Mini result: {result}")
 
 
 if __name__ == "__main__":
