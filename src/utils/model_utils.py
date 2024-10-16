@@ -32,7 +32,7 @@ def move_inputs_to_device(inputs, model):
 
 def generate_output(model, inputs, processor, max_new_tokens=500, **kwargs):
     """Generate output from the model."""
-    with torch.inference_mode(), torch.cuda.amp.autocast(dtype=torch.bfloat16):
+    with torch.inference_mode(), torch.amp.autocast("cuda", dtype=torch.bfloat16):
         output = model.generate(
             **inputs, max_new_tokens=max_new_tokens, tokenizer=processor.tokenizer, **kwargs
         )
