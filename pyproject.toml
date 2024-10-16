@@ -5,9 +5,15 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "anthropic>=0.36.1",
+    "accelerate>=1.0.1",
+    "anthropic>=0.34",
     "ell-ai[all]>=0.0.14",
     "ipykernel>=6.29.5",
     "openai>=1.51.2",
+    "pip>=24.2",
     "python-dotenv",
+    "torch>=2.4.1",
+    "torchaudio>=2.4.1",
+    "torchvision>=0.19.1",
+    "transformers>=4.45.2",
 ]
