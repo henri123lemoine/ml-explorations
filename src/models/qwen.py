@@ -1,4 +1,5 @@
 from threading import Thread
+from typing import Any, Generator
 
 import torch
 from transformers import (
@@ -8,58 +9,57 @@ from transformers import (
     logging,
 )
 
+from src.models.base import BaseModel
+
 # Set logging level to suppress info messages
 logging.set_verbosity_error()
 
 
-def load_model_and_tokenizer(model_name: str):
-    """Load the model and tokenizer."""
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name, torch_dtype=torch.float16, device_map="auto"
-    )
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    return model, tokenizer
+class QwenModel(BaseModel):
+    def __init__(self, model_name: str = "Qwen/Qwen2-0.5B-Instruct"):
+        self.model_name = model_name
+        self.model = None
+        self.tokenizer = None
 
+    def load(self):
+        self.model = AutoModelForCausalLM.from_pretrained(
+            self.model_name, torch_dtype=torch.float16, device_map="auto"
+        )
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
 
-def prepare_input(tokenizer, prompt: str, system_message: str):
-    """Prepare the input for the model."""
-    messages = [
-        {"role": "system", "content": system_message},
-        {"role": "user", "content": prompt},
-    ]
-    text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    return tokenizer([text], return_tensors="pt")
+    def prepare_inputs(self, inputs: dict[str, str]) -> dict[str, torch.Tensor]:
+        messages = [
+            {"role": "system", "content": inputs["system_message"]},
+            {"role": "user", "content": inputs["prompt"]},
+        ]
+        text = self.tokenizer.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
+        return self.tokenizer([text], return_tensors="pt")
 
+    def generate(self, inputs: dict[str, Any], streaming: bool = False):
+        if streaming:
+            return self._generate_stream(inputs)
+        else:
+            return self._generate_non_stream(inputs)
 
-def generate_stream(model, tokenizer, model_inputs, max_new_tokens: int = 512):
-    """Generate text stream from the model."""
-    model_inputs = model_inputs.to(model.device)
-    streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
-    generation_kwargs = dict(model_inputs, streamer=streamer, max_new_tokens=max_new_tokens)
+    def _generate_non_stream(self, inputs: dict[str, torch.Tensor]) -> str:
+        inputs = inputs.to(self.model.device)
+        output = self.model.generate(**inputs, max_new_tokens=512)
+        return self.tokenizer.decode(output[0], skip_special_tokens=True)
 
-    thread = Thread(target=model.generate, kwargs=generation_kwargs)
-    thread.start()
+    def _generate_stream(self, inputs: dict[str, torch.Tensor]) -> Generator[str, None, None]:
+        inputs = inputs.to(self.model.device)
+        streamer = TextIteratorStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=True)
+        generation_kwargs = dict(inputs, streamer=streamer, max_new_tokens=512)
 
-    for text in streamer:
-        yield text
+        thread = Thread(target=self.model.generate, kwargs=generation_kwargs)
+        thread.start()
 
-    thread.join()
+        for text in streamer:
+            yield text
 
+        thread.join()
 
-def main():
-    MODEL_NAME = "Qwen/Qwen2-0.5B-Instruct"
-    SYSTEM_MESSAGE = "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."
-    PROMPT = "Give me a short introduction to large language model."
-
-    model, tokenizer = load_model_and_tokenizer(MODEL_NAME)
-    model_inputs = prepare_input(tokenizer, PROMPT, SYSTEM_MESSAGE)
-
-    print("Streaming output:")
-    for text in generate_stream(model, tokenizer, model_inputs):
-        print(text, end="", flush=True)
-
-    print("\nStreaming finished.")
-
-
-if __name__ == "__main__":
-    main()
+    def train(self, training_data: Any, training_config: dict[str, Any]):
+        raise NotImplementedError("Training not implemented for Qwen model yet")

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any
 
 
 class BaseModel(ABC):
@@ -8,13 +8,13 @@ class BaseModel(ABC):
         pass
 
     @abstractmethod
-    def prepare_inputs(self, inputs: Any) -> Dict[str, Any]:
+    def prepare_inputs(self, inputs: Any) -> dict[str, Any]:
         pass
 
     @abstractmethod
-    def generate(self, inputs: Dict[str, Any], streaming: bool = False):
+    def generate(self, inputs: dict[str, Any], streaming: bool = False):
         pass
 
     @abstractmethod
-    def train(self, training_data: Any, training_config: Dict[str, Any]):
+    def train(self, training_data: Any, training_config: dict[str, Any]):
         pass
