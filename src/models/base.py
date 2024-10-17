@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generator
+from typing import Any
 
 
-class BaseModel(ABC):
+class Model(ABC):
     @abstractmethod
-    def load(self, model_path: str, **kwargs):
+    def save(self, path):
         pass
 
     @abstractmethod
-    def prepare_inputs(self, inputs: Any) -> dict[str, Any]:
+    def load(cls, path):
         pass
 
     @abstractmethod
@@ -19,55 +19,11 @@ class BaseModel(ABC):
     def train(self, training_data: Any, training_config: dict[str, Any]):
         pass
 
-    @abstractmethod
-    def save(self, save_path: str):
-        pass
+    def fit(self, X, y):
+        raise NotImplementedError("This model does not support the fit method")
 
+    def predict(self, X):
+        raise NotImplementedError("This model does not support the predict method")
 
-class BaseInput(ABC):
-    @abstractmethod
-    def process(self, raw_input: Any) -> dict[str, Any]:
-        pass
-
-
-class BaseOutput(ABC):
-    @abstractmethod
-    def process(self, model_output: Any) -> Any:
-        pass
-
-    @abstractmethod
-    def stream(self, model_output: Generator) -> Generator[Any, None, None]:
-        raise NotImplementedError("Streaming not implemented for this output processor")
-
-
-class StreamOutput(BaseOutput):
-    @abstractmethod
-    def stream(self, model_output: Generator) -> Generator[Any, None, None]:
-        pass
-
-    def process(self, model_output: Any) -> Any:
-        # Default implementation for non-streaming output
-        return "".join(self.stream(model_output))
-
-
-class SimpleTextInput(BaseInput):
-    def process(self, raw_input: str) -> dict:
-        return {
-            "prompt": raw_input,
-            "system_message": "You are Qwen, created by Alibaba Cloud. You are a helpful assistant.",
-        }
-
-
-class SimpleTextOutput(BaseOutput):
-    def process(self, model_output: str) -> str:
-        return model_output
-
-
-class SimpleStreamOutput(StreamOutput):
-    def stream(self, model_output):
-        for chunk in model_output:
-            yield chunk
-
-    def process(self, model_output: str) -> str:
-        # This method is required by the BaseOutput abstract class
-        return "".join(self.stream(model_output))
+    def evaluate(self, X, y):
+        raise NotImplementedError("This model does not support the evaluate method")

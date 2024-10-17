@@ -1,44 +1,35 @@
-# https://huggingface.co/rhymes-ai/Aria
-
-# src/models/aria.py
 from typing import Any, Generator
 
+import requests
 import torch
-from transformers import AutoModelForCausalLM, AutoProcessor
+from PIL import Image
 
-from src.models.base import BaseModel
-from src.utils.generic import (
-    generate_output,
-    load_image_from_url,
-    move_inputs_to_device,
-    prepare_inputs,
-)
+# Set logging level to suppress info messages
+from transformers import AutoModelForCausalLM, AutoProcessor, logging
+
+from src.models.base import Model
+
+logging.set_verbosity_error()
 
 
-class AriaModel(BaseModel):
+class AriaModel(Model):
     def __init__(self):
         self.model = None
         self.processor = None
 
-    def load(self, model_path: str = "rhymes-ai/Aria", **kwargs):
+    def load(self, path: str = "rhymes-ai/Aria", **kwargs):
         self.model = AutoModelForCausalLM.from_pretrained(
-            model_path,
+            path,
             device_map="auto",
             torch_dtype=torch.bfloat16,
             trust_remote_code=True,
             **kwargs,
         )
-        self.processor = AutoProcessor.from_pretrained(model_path, trust_remote_code=True)
+        self.processor = AutoProcessor.from_pretrained(path, trust_remote_code=True)
 
-    def prepare_inputs(self, inputs: dict[str, Any]) -> dict[str, Any]:
-        messages = inputs.get("messages", [])
-        image_url = inputs.get("image_url")
-
-        image = load_image_from_url(image_url) if image_url else None
-
-        text = self.processor.apply_chat_template(messages, add_generation_prompt=True)
-        model_inputs = prepare_inputs(self.processor, text, image)
-        return move_inputs_to_device(model_inputs, self.model)
+    def save(self, save_path: str):
+        self.model.save_pretrained(save_path)
+        self.processor.save_pretrained(save_path)
 
     def generate(self, inputs: dict[str, Any], streaming: bool = False) -> Any:
         if streaming:
@@ -46,16 +37,72 @@ class AriaModel(BaseModel):
         else:
             return self._generate_non_stream(inputs)
 
-    def _generate_non_stream(self, inputs: dict[str, Any]) -> str:
-        return generate_output(self.model, inputs, self.processor)
-
-    def _generate_stream(self, inputs: dict[str, Any]) -> Generator[str, None, None]:
-        # Implement streaming logic here
-        raise NotImplementedError("Streaming not yet implemented for Aria model")
-
     def train(self, training_data: Any, training_config: dict[str, Any]):
         raise NotImplementedError("Training not implemented for Aria model yet")
 
-    def save(self, save_path: str):
-        self.model.save_pretrained(save_path)
-        self.processor.save_pretrained(save_path)
+    def _generate_non_stream(self, inputs: dict[str, Any]) -> str:
+        with torch.inference_mode(), torch.amp.autocast("cuda", dtype=torch.bfloat16):
+            output = self.model.generate(
+                **inputs,
+                max_new_tokens=500,
+                tokenizer=self.processor.tokenizer,
+            )
+            output_ids = output[0][inputs["input_ids"].shape[1] :]
+            result = self.processor.decode(output_ids, skip_special_tokens=True)
+        return result
+
+    def _generate_stream(self, inputs: dict[str, Any]) -> Generator[str, None, None]:
+        raise NotImplementedError("Streaming not yet implemented for Aria model")
+
+
+def load_image_from_url(url: str) -> Image.Image:
+    return Image.open(requests.get(url, stream=True).raw)
+
+
+def prepare_inputs(raw_input: dict[str, Any], processor, model) -> dict[str, Any]:
+    messages = raw_input.get("messages", [])
+    image_url = raw_input.get("image_url")
+
+    image = load_image_from_url(image_url) if image_url else None
+
+    text = processor.apply_chat_template(messages, add_generation_prompt=True)
+    inputs = (
+        processor(text=[text], images=image, return_tensors="pt")
+        if image
+        else processor(text=[text], return_tensors="pt")
+    )
+
+    if "pixel_values" in inputs:
+        inputs["pixel_values"] = inputs["pixel_values"].to(model.dtype)
+    return {k: v.to(model.device) for k, v in inputs.items()}
+
+
+# def generate_output(model, inputs, processor, max_new_tokens=500, **kwargs):
+#     """Generate output from the model."""
+#     with torch.inference_mode(), torch.amp.autocast("cuda", dtype=torch.bfloat16):
+#         output = model.generate(
+#             **inputs,
+#             max_new_tokens=max_new_tokens,
+#             tokenizer=processor.tokenizer,
+#             **kwargs,
+#         )
+#         output_ids = output[0][inputs["input_ids"].shape[1] :]
+#         result = processor.decode(output_ids, skip_special_tokens=True)
+#     return result
+
+
+if __name__ == "__main__":
+    model = AriaModel()
+    model.load()
+
+    raw_input = {
+        "messages": [
+            {"role": "system", "content": "You are Aria, a helpful AI assistant."},
+            {"role": "user", "content": "Tell me about this image."},
+        ],
+        "image_url": "https://example.com/image.jpg",  # Replace with an actual image URL
+    }
+
+    model_inputs = prepare_inputs(raw_input, model.processor, model.model)
+    output = model.generate(model_inputs)
+    print(output)

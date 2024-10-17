@@ -5,43 +5,51 @@ import torch
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
+    PreTrainedTokenizerBase,
     TextIteratorStreamer,
     logging,
 )
 
-from src.models.base import BaseModel
+from src.models.base import Model
 
 # Set logging level to suppress info messages
 logging.set_verbosity_error()
 
 
-class QwenModel(BaseModel):
+class QwenModel(Model):
+    """
+    TODO: Explore
+    - https://qwenlm.github.io/blog/qwen2.5/
+    - https://huggingface.co/Qwen
+        https://huggingface.co/collections/Qwen/qwen25-coder-66eaa22e6f99801bf65b0c2f
+        https://huggingface.co/collections/Qwen/qwen25-math-66eaa240a1b7d5ee65f1da3e
+        https://huggingface.co/collections/Qwen/qwen2-vl-66cee7455501d7126940800d
+    - https://github.com/QwenLM/Qwen2.5
+    """
+
     def __init__(self, model_name: str = "Qwen/Qwen2-0.5B-Instruct"):
         self.model_name = model_name
         self.model = None
-        self.tokenizer = None
+        self.tokenizer: PreTrainedTokenizerBase | None = None
 
-    def load(self):
+    def load(self, path: str = None, **kwargs):
         self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_name, torch_dtype=torch.float16, device_map="auto"
+            path or self.model_name, torch_dtype=torch.float16, device_map="auto"
         )
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        self.tokenizer = AutoTokenizer.from_pretrained(path or self.model_name)
 
-    def prepare_inputs(self, inputs: dict[str, str]) -> dict[str, torch.Tensor]:
-        messages = [
-            {"role": "system", "content": inputs["system_message"]},
-            {"role": "user", "content": inputs["prompt"]},
-        ]
-        text = self.tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
-        )
-        return self.tokenizer([text], return_tensors="pt")
+    def save(self, save_path: str):
+        self.model.save_pretrained(save_path)
+        self.tokenizer.save_pretrained(save_path)
 
     def generate(self, inputs: dict[str, Any], streaming: bool = False):
         if streaming:
             return self._generate_stream(inputs)
         else:
             return self._generate_non_stream(inputs)
+
+    def train(self, training_data: Any, training_config: dict[str, Any]):
+        raise NotImplementedError("Training not implemented for Qwen model yet")
 
     def _generate_non_stream(self, inputs: dict[str, torch.Tensor]) -> str:
         inputs = inputs.to(self.model.device)
@@ -61,9 +69,23 @@ class QwenModel(BaseModel):
 
         thread.join()
 
-    def train(self, training_data: Any, training_config: dict[str, Any]):
-        raise NotImplementedError("Training not implemented for Qwen model yet")
 
-    def save(self, save_path: str):
-        self.model.save_pretrained(save_path)
-        self.tokenizer.save_pretrained(save_path)
+if __name__ == "__main__":
+    model = QwenModel()
+    model.load()
+
+    prompt = "Tell me a short joke"
+    messages = [
+        {
+            "role": "system",
+            "content": "You are Qwen, created by Alibaba Cloud. You are a helpful assistant.",
+        },
+        {"role": "user", "content": prompt},
+    ]
+    text = model.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    model_inputs = model.tokenizer([text], return_tensors="pt")
+    model_output = model.generate(model_inputs, streaming=True)
+
+    print("Streaming result:")
+    for chunk in model_output:
+        print(chunk, end="", flush=True)
