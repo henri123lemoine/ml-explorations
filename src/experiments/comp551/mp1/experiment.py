@@ -6,20 +6,22 @@ import numpy as np
 import pandas as pd
 from matplotlib.transforms import Bbox
 
-from src.models.legacy_models import (
-    LinearRegressionAnalytic,
-    LinearRegressionGD,
-    LinearRegressionSGD,
-    LogisticRegressionGD,
-    LogisticRegressionSGD,
-)
-from src.settings import DATASETS_PATH
-from src.utils.data_processing import (
+from src.datasets.data_processing import (
     k_fold_cross_validation,
     normalize,
     standardize,
     train_test_split,
 )
+from src.models.legacy.linear_regression import (
+    LinearRegressionAnalytic,
+    LinearRegressionGD,
+    LinearRegressionSGD,
+)
+from src.models.legacy.logistic_regression import (
+    LogisticRegressionGD,
+    LogisticRegressionSGD,
+)
+from src.settings import DATASETS_PATH
 from src.utils.metrics import MSE, accuracy, f1_score, precision, recall
 from src.utils.visualization import plot1, print_table
 
