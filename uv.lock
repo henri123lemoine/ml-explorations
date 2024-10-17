@@ -804,6 +804,8 @@ dependencies = [
     { name = "pillow" },
     { name = "pytest" },
     { name = "python-dotenv" },
+    { name = "replicate" },
+    { name = "requests" },
     { name = "tabulate" },
     { name = "torch" },
     { name = "torchaudio" },
@@ -825,6 +827,8 @@ requires-dist = [
     { name = "pillow", specifier = ">=10.4.0" },
     { name = "pytest", specifier = ">=8.3.3" },
     { name = "python-dotenv" },
+    { name = "replicate", specifier = ">=1.0.2" },
+    { name = "requests", specifier = ">=2.32.3" },
     { name = "tabulate", specifier = ">=0.9.0" },
     { name = "torch", specifier = ">=2.4.1" },
     { name = "torchaudio", specifier = ">=2.4.1" },
@@ -1562,6 +1566,21 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/12/7f/8398c8155a3c70703a8e91c29532558186558e1aea44144b382faa2a6f7a/regex-2024.9.11-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:6a2644a93da36c784e546de579ec1806bfd2763ef47babc1b03d765fe560c9f8", size = 787398 },
     { url = "https://files.pythonhosted.org/packages/58/3a/f5903977647a9a7e46d5535e9e96c194304aeeca7501240509bde2f9e17f/regex-2024.9.11-cp313-cp313-win32.whl", hash = "sha256:e997fd30430c57138adc06bba4c7c2968fb13d101e57dd5bb9355bf8ce3fa7e8", size = 262035 },
     { url = "https://files.pythonhosted.org/packages/ff/80/51ba3a4b7482f6011095b3a036e07374f64de180b7d870b704ed22509002/regex-2024.9.11-cp313-cp313-win_amd64.whl", hash = "sha256:042c55879cfeb21a8adacc84ea347721d3d83a159da6acdf1116859e2427c43f", size = 273510 },
+]
+
+[[package]]
+name = "replicate"
+version = "1.0.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "packaging" },
+    { name = "pydantic" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/53/87/d925674d3c7022d4446af6b389eb34ecd5f5889f7f33f27392c64119cadf/replicate-1.0.2.tar.gz", hash = "sha256:faa3551a825d9eb2c0bfc0407ddab75b9e02865344168241a1d41a4e73bbc661", size = 56324 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6f/9d/fc1ff5da0f539990ca8a7d53e5935b8df753fea57f42465ffa7afdbbb401/replicate-1.0.2-py3-none-any.whl", hash = "sha256:808009853d5e49f706c9a67a9f97b712c89e2c75e63947f7cc012b847c28bef2", size = 46349 },
 ]
 
 [[package]]

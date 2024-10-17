@@ -17,6 +17,8 @@ dependencies = [
     "pillow>=10.4.0",
     "pytest>=8.3.3",
     "python-dotenv",
+    "replicate>=1.0.2",
+    "requests>=2.32.3",
     "tabulate>=0.9.0",
     "torch>=2.4.1",
     "torchaudio>=2.4.1",
