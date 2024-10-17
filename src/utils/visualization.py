@@ -140,7 +140,10 @@ def plot(
         if custom_x_labels is not None:
             ax.set_xticks(np.arange(len(custom_x_labels)))
             ax.set_xticklabels(custom_x_labels)
-            ax.set_xlim(x_axis_relative_range[0], len(custom_x_labels) + x_axis_relative_range[1])
+            ax.set_xlim(
+                x_axis_relative_range[0],
+                len(custom_x_labels) + x_axis_relative_range[1],
+            )
 
         if range_y is not None and range_y[i] is not None:
             ax.set_ylim(range_y[i])

@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 
 def MSE(y_true, y_pred):
@@ -17,7 +18,10 @@ def confusion_matrix_multiclass(y_true, y_pred):
 
 
 def accuracy(y_true, y_pred):
-    return np.mean(y_true == y_pred)
+    if isinstance(y_true, torch.Tensor) and isinstance(y_pred, torch.Tensor):
+        return (y_pred == y_true).float().mean().item()
+    else:
+        return np.mean(y_true == y_pred)
 
 
 def precision(y_true, y_pred):

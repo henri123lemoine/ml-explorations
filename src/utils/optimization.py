@@ -6,7 +6,15 @@ np.random.seed(42)
 
 
 def gradient_descent(
-    model, X, Y, predict_func, learning_rate, epochs, test_func, test_interval, test_start
+    model,
+    X,
+    Y,
+    predict_func,
+    learning_rate,
+    epochs,
+    test_func,
+    test_interval,
+    test_start,
 ):
     test_results = []
     X = add_bias_term(X)
