@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader, IterableDataset
 
 import datasets
 from src.datasets.data_processing import dataset_stats
+from src.settings import DATASETS_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ def load_dataset(
     flatten=True,
     shuffle=True,
     random_state=None,
-    data_dir="./data/datasets",
+    data_dir=DATASETS_PATH,
 ):
     """
     Loads a dataset using PyTorch's torchvision library, applies transformations, and prepares it for training and testing.
