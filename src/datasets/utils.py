@@ -21,6 +21,8 @@ class DatasetExtractor:
         total_items: int,
         output_dir: str | Path,
         cache_key_prefix: str,
+        dataset_name: str = "",
+        dataset_author: str = "",
         max_retries: int = 3,
         retry_delay: int = 1,
         request_delay: float = 1.0,
@@ -31,6 +33,8 @@ class DatasetExtractor:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.cache_key_prefix = cache_key_prefix
+        self.dataset_name = dataset_name
+        self.dataset_author = dataset_author
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self.request_delay = request_delay
@@ -94,14 +98,16 @@ class DatasetExtractor:
         Format the extracted dataset.
         This method can be overridden by subclasses if needed.
         """
-        # TODO: Un-hardcode the heading
-        return (
-            "# Harry Potter and the Methods of Rationality\n\nby Eliezer Yudkowsky\n\n"
-            + "\n\n\n".join(
-                f"## {items.get(i, {'title': f'Item {i}', 'content': '[Content missing]'})['title']}\n{items.get(i, {'content': ''})['content']}"
-                for i in range(1, self.total_items + 1)
-            )
+        header = f"# {self.dataset_name}\n\n"
+        if self.dataset_author:
+            header += f"by {self.dataset_author}\n\n"
+
+        content = "\n\n".join(
+            f"## {items.get(i, {'title': f'Chapter {i}', 'content': '[Content missing]'})['title']}\n\n{items.get(i, {'content': ''})['content']}"
+            for i in range(1, self.total_items + 1)
         )
+
+        return header + content
 
     def save_dataset(self, content: str, filename: str) -> None:
         """Save the dataset to a file"""
