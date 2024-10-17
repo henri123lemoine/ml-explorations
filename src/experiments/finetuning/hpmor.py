@@ -6,7 +6,7 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
-from markdownify import markdownify as md
+from markdownify import markdownify
 from tqdm import tqdm
 
 from src.utils.cache import cache
@@ -15,13 +15,7 @@ logger = logging.getLogger(__name__)
 
 HPMOR_EXP_PATH = Path(__file__).resolve().parent
 DATA_PATH = HPMOR_EXP_PATH / "data"
-PLOTS_PATH = DATA_PATH / "plots"
-CHAPTERS_PATH = DATA_PATH / "chapters"
-LOG_PATH = DATA_PATH / "logs"
-
-PLOTS_PATH.mkdir(parents=True, exist_ok=True)
-CHAPTERS_PATH.mkdir(parents=True, exist_ok=True)
-LOG_PATH.mkdir(parents=True, exist_ok=True)
+DATA_PATH.mkdir(parents=True, exist_ok=True)
 
 HPMOR_BASE = "https://hpmor.com"
 CHAPTERS_ROUTE = "/chapter/"
@@ -47,7 +41,7 @@ def extract_chapter(number: int) -> dict:
     title = title_div.contents[0].replace("\n", " ").strip()
 
     content_div = soup.find("div", id="storycontent")
-    content = md(str(content_div))
+    content = markdownify(str(content_div))
 
     return {"title": title, "content": content}
 
@@ -83,8 +77,8 @@ def extract_hpmor() -> str:
     if len(chapters) != CHAPTER_COUNT:
         logger.warning(f"Only {len(chapters)}/{CHAPTER_COUNT} chapters were successfully extracted")
 
-    full_text = "\n\n".join(
-        f"# {chapters.get(i, {'title': f'Chapter {i}', 'content': '[Content missing]'})['title']}\n\n{chapters.get(i, {'content': ''})['content']}"
+    full_text = "\n".join(
+        f"# {chapters.get(i, {'title': f'Chapter {i}', 'content': '[Content missing]'})['title']}\n{chapters.get(i, {'content': ''})['content']}"
         for i in range(1, CHAPTER_COUNT + 1)
     )
 
