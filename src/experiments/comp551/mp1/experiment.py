@@ -21,7 +21,7 @@ from src.utils.data_processing import (
     train_test_split,
 )
 from src.utils.metrics import MSE, accuracy, f1_score, precision, recall
-from src.utils.visualization import plot, print_table
+from src.utils.visualization import plot1, print_table
 
 # ---------------------------------- controls ----------------------------------
 
@@ -438,7 +438,7 @@ if experiment_3:
     # Linear Regression on Boston Dataset
     max_y = data_boston.max() * 1.2
 
-    plot(
+    plot1(
         data=data_boston,
         title="Performance vs. Training Size (Boston Dataset - Linear Regression)",
         main_labels=["Training Size"] + dim_1_boston,
@@ -456,7 +456,7 @@ if experiment_3:
     max_y = 1.0
     min_y = data_wine.min() * 0.8
 
-    plot(
+    plot1(
         data=data_wine,
         title="Performance vs. Training Size (Wine Dataset - Logistic Regression)",
         main_labels=["Training Size"] + dim_1_wine,
@@ -650,7 +650,7 @@ if experiment_5:
     min_y = data_boston.min() * 0.8
     max_y = data_boston.max() * 1.2
 
-    plot(
+    plot1(
         data=data_boston,
         title="Performance vs. Learning Rate",
         main_labels=["Learning Rate"] + dim_1_boston,
@@ -668,7 +668,7 @@ if experiment_5:
     min_y = data_wine.min() * 0.8
     max_y = 1.0
 
-    plot(
+    plot1(
         data=data_wine,
         title="Performance vs. Learning Rate",
         main_labels=["Learning Rate"] + dim_1_wine,
@@ -804,7 +804,7 @@ if experiment_6:
     ]
 
     # Plotting
-    plot(
+    plot1(
         data=data_boston,
         title="Performance vs. Learning Rate and Batch Size (Boston-LR)",
         main_labels=["Batch Size"] + dim_1_boston,
@@ -817,7 +817,7 @@ if experiment_6:
         show=SHOW_GRAPHS,
     )
 
-    plot(
+    plot1(
         data=data_wine,
         title="Performance vs. Learning Rate and Batch Size (Wine-LogR)",
         main_labels=["Batch Size"] + dim_1_wine,
