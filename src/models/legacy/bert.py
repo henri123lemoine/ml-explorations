@@ -12,18 +12,14 @@ from transformers import (
     BertForSequenceClassification,
 )
 
-from src.dataset_retrival import DataPoint
-from src.models.model import Model
+from src.datasets.retrieval import DataPoint
+from src.models.legacy.model import Model
 
 logger = logging.getLogger(__name__)
-
-
-# -------------------------------- GPU -------------------------------- #
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-# -------------------------------- MODELS -------------------------------- #
 # TODO: Add softmax classifier
 
 

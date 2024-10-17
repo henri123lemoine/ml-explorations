@@ -1,0 +1,63 @@
+default_parameters:
+  batch_size: 64
+  beta1: 0.9
+  beta2: 0.999
+  epochs: 5
+  epsilon: 1e-8
+  factor: 0.5
+  learning_rate: 2.0e-05
+  mode: min
+  optimizer: Adam
+  patience: 2
+  scheduler: ReduceLROnPlateau
+experiments_info:
+  '1':
+    model_name: NaiveBayes
+    representations:
+    - count
+    - binary
+    - tfidf
+  '2':
+    model_name: NaiveBayes
+    representation: count
+    alpha:
+      max: 2.0
+      min: 0.0
+      num: 8
+      values: []
+    min_df:
+      max: 30
+      min: 1
+      num: 8
+      values: []
+  '3':
+    epochs: 5
+    model_names:
+    - NaiveBayes
+    - DefaultBERT
+    - InitBERT
+    - FrozenBERT
+    representation: count
+    min_df: 15
+  '4':
+    model_name: NaiveBayes
+  '5':
+    model_name: DefaultBERT
+  bert_debug:
+    model_name: DefaultBERT
+    epochs: 1
+  naive_bayes_debug:
+    model_name: NaiveBayes
+    alpha: 1.0
+global_parameters:
+  CACHE_PARTIAL_RESULTS: true
+  OUTPUT_FILE: null
+  PRINT_LOSS: true
+  REUSE_CACHED_RESULTS: true
+  SAVE_FILES: true
+  SEED: 42
+  SHOW_GRAPHS: true
+logging_config:
+  format: '[%(asctime)s - %(levelname)s]: %(message)s'
+  # level: DEBUG
+  level: INFO
