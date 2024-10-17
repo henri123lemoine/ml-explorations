@@ -7,7 +7,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoProcessor
 
 from src.models.base import BaseModel
-from src.utils import (
+from src.utils.generic import (
     generate_output,
     load_image_from_url,
     move_inputs_to_device,
