@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.utils.data_processing import add_bias_term
+from src.datasets.data_processing import add_bias_term
 
 np.random.seed(42)
 
