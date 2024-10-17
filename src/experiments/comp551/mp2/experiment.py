@@ -8,16 +8,19 @@ from typing import Any, cast
 
 import numpy as np
 import torch
+import torch.nn as nn
+import torch.optim as optim
 import torchvision.models as models
 
-from src.experiments.comp551.mp2.experiment import *
-from src.models.legacy_models import *
+from src.datasets.retrieval import load_dataset
+from src.models.legacy.CNN import CNN
+from src.models.legacy.MLP import MLP
+from src.models.legacy.utils import *
 from src.settings import CACHE_PATH
 from src.utils.config import load_config
-from src.utils.data_processing import load_dataset
 from src.utils.visualization import plot
 
-logging.basicConfig(level=logging.DEBUG, format="[%(asctime)s - %(levelname)s]: %(message)s")
+logging.basicConfig(level=logging.INFO, format="[%(asctime)s - %(levelname)s]: %(message)s")
 logger = logging.getLogger(__name__)
 
 MP2_PATH = Path(__file__).resolve().parent
@@ -977,7 +980,7 @@ def experiment_9(
     )
 
     # 2. Modify Pre-trained Model
-    resnet = models.resnet18(pretrained=True)
+    resnet = models.resnet18(weights=True)
     for param in resnet.parameters():
         param.requires_grad = False
 

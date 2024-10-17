@@ -69,4 +69,4 @@ global_parameters:
   CACHE_PARTIAL_RESULTS: True
   REUSE_CACHED_RESULTS: True
   SEED: 42
-output_file: False  # "data/experiments_output.txt"
+output_file: "data/experiments_output.txt"
