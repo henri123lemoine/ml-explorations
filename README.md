@@ -59,3 +59,7 @@ uv run -m src.models.qwen
 ## Testing
 
 Use `uvx pytest tests` to run the tests.
+
+## Acknowledgements
+
+This codebase includes some code produced over the course of COMP551 mini-projects with JX Mo and Fraser Ross Lee.
