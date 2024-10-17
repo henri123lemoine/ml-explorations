@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,7 +13,7 @@ from src.models.legacy_models import (
     LogisticRegressionGD,
     LogisticRegressionSGD,
 )
-from src.settings import PROJECT_PATH
+from src.settings import DATASETS_PATH
 from src.utils.data_processing import (
     k_fold_cross_validation,
     normalize,
@@ -24,7 +25,7 @@ from src.utils.visualization import plot, print_table
 
 # ---------------------------------- controls ----------------------------------
 
-print_output_to_file = False
+print_output_to_file = True
 basic_stats = True
 basic_experiment = True
 experiment_1 = True
@@ -40,14 +41,14 @@ SEED: int = 42
 SAVE_FILES: bool = True
 SHOW_GRAPHS: bool = False
 
-DATA_PATH = PROJECT_PATH / "data"
-DATASETS_PATH = DATA_PATH / "datasets"
-EXPERIMENTS_PATH = DATA_PATH / "experiments"
-EXPERIMENT_PATH = EXPERIMENTS_PATH / "comp551-mp1"
-PLOTS_PATH = EXPERIMENT_PATH / "plots"
+MP1_PATH = Path(__file__).resolve().parent
+DATA_PATH = MP1_PATH / "data"
+PLOTS_PATH = DATA_PATH / "plots"
+
+PLOTS_PATH.mkdir(parents=True, exist_ok=True)
 
 if print_output_to_file:
-    file = open(EXPERIMENT_PATH / "experiments_output.txt", "w")
+    file = open(DATA_PATH / "experiment_outputs.txt", "w")
     sys.stdout = file
 
 
