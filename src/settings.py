@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from pathlib import Path
 
 import anthropic
 import openai
@@ -7,7 +8,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# General
 DATE = datetime.now().strftime("%Y-%m-%d")
+PROJECT_PATH = PROJECT_DIR = Path(__file__).resolve().parent.parent
 
 # Clients
 
