@@ -1,11 +1,15 @@
 import functools
+import hashlib
 import json
+import logging
 import os
 import pickle
 from pathlib import Path
 from typing import Any, Callable, Union
 
 from src.settings import CACHE_PATH
+
+logger = logging.getLogger(__name__)
 
 
 class Cache:
@@ -21,10 +25,16 @@ class Cache:
             @functools.wraps(f)
             def wrapper(*args, **kwargs):
                 key = self._make_key(key_prefix, f, args, kwargs)
+                # logger.debug(f"Cache key generated: {key}")
                 result = self._load_from_disk(key, serializer)
                 if result is None:
+                    # logger.debug(f"Cache miss for key: {key}")
                     result = f(*args, **kwargs)
                     self._save_to_disk(key, result, serializer)
+                    # logger.debug(f"Saved result to cache for key: {key}")
+                else:
+                    # logger.debug(f"Cache hit for key: {key}")
+                    pass
                 return result
 
             return functools.lru_cache(maxsize=self.maxsize)(wrapper)
@@ -38,11 +48,17 @@ class Cache:
         self._save_to_disk(key, value, serializer)
 
     def _make_key(self, prefix: str, func: Callable, args: tuple, kwargs: dict) -> str:
-        key = f"{prefix}_{func.__name__}_{hash(args)}_{hash(frozenset(kwargs.items()))}"
-        return key
+        # Extract only the item number from args
+        item_number = args[1] if len(args) > 1 else args[0]
+        key_parts = [prefix, func.__name__, str(item_number)]
+        key_string = "_".join(key_parts)
+        # logger.debug(f"Key parts: {key_parts}")
+        # logger.debug(f"Generated key: {key_string}")
+        return hashlib.sha256(key_string.encode()).hexdigest()
 
     def _load_from_disk(self, key: str, serializer: str) -> Any:
         file_path = self.cache_dir / f"{key}.{serializer}"
+        # logger.debug(f"Attempting to load from cache file: {file_path}")
         if file_path.exists():
             with open(file_path, "rb" if serializer == "pickle" else "r") as f:
                 if serializer == "json":
@@ -55,10 +71,12 @@ class Cache:
                     except json.JSONDecodeError:
                         f.seek(0)
                         return pickle.load(f)
+        # logger.debug(f"Cache file not found: {file_path}")
         return None
 
     def _save_to_disk(self, key: str, value: Any, serializer: str) -> None:
         file_path = self.cache_dir / f"{key}.{serializer}"
+        # logger.debug(f"Saving to cache file: {file_path}")
         mode = "wb" if serializer == "pickle" else "w"
         with open(file_path, mode) as f:
             if serializer == "json":
