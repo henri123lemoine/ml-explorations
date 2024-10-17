@@ -77,20 +77,6 @@ def prepare_inputs(raw_input: dict[str, Any], processor, model) -> dict[str, Any
     return {k: v.to(model.device) for k, v in inputs.items()}
 
 
-# def generate_output(model, inputs, processor, max_new_tokens=500, **kwargs):
-#     """Generate output from the model."""
-#     with torch.inference_mode(), torch.amp.autocast("cuda", dtype=torch.bfloat16):
-#         output = model.generate(
-#             **inputs,
-#             max_new_tokens=max_new_tokens,
-#             tokenizer=processor.tokenizer,
-#             **kwargs,
-#         )
-#         output_ids = output[0][inputs["input_ids"].shape[1] :]
-#         result = processor.decode(output_ids, skip_special_tokens=True)
-#     return result
-
-
 if __name__ == "__main__":
     model = AriaModel()
     model.load()
