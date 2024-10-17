@@ -1,10 +1,12 @@
 import logging
+import re
 import time
 from pathlib import Path
-from typing import Callable, Union
+from typing import Callable
 
 import requests
 from bs4 import BeautifulSoup
+from tqdm import tqdm
 
 from src.utils.cache import cache
 
@@ -17,10 +19,11 @@ class DatasetExtractor:
         base_url: str,
         route: str,
         total_items: int,
-        output_dir: Union[str, Path],
+        output_dir: str | Path,
         cache_key_prefix: str,
         max_retries: int = 3,
         retry_delay: int = 1,
+        request_delay: float = 1.0,
     ):
         self.base_url = base_url
         self.route = route
@@ -30,6 +33,8 @@ class DatasetExtractor:
         self.cache_key_prefix = cache_key_prefix
         self.max_retries = max_retries
         self.retry_delay = retry_delay
+        self.request_delay = request_delay
+        self.last_request_time = 0
 
     def extract_item(self, item_number: int) -> dict[str, str]:
         """
@@ -38,15 +43,23 @@ class DatasetExtractor:
         """
         raise NotImplementedError("Subclasses must implement extract_item method")
 
-    @cache.disk_cache(serializer="json")
     def fetch_item(self, item_number: int) -> dict[str, str]:
         """Fetch and cache a single item"""
+        logger.debug(f"Cache miss for item {item_number}. Extracting data.")
+        self._delay_if_needed()
         return self.extract_item(item_number)
+
+    def _delay_if_needed(self):
+        """Delay the request if necessary to respect the request_delay"""
+        current_time = time.time()
+        time_since_last_request = current_time - self.last_request_time
+        if time_since_last_request < self.request_delay:
+            time.sleep(self.request_delay - time_since_last_request)
+        self.last_request_time = time.time()
 
     def get_item(self, item_number: int) -> dict[str, str]:
         """Get a single item with retries"""
         for attempt in range(self.max_retries):
-            time.sleep(self.retry_delay)
             try:
                 return self.fetch_item(item_number)
             except Exception as e:
@@ -54,18 +67,20 @@ class DatasetExtractor:
                     f"Error extracting item {item_number} (attempt {attempt + 1}): {str(e)}"
                 )
                 if attempt < self.max_retries - 1:
-                    time.sleep(2**attempt)  # Exponential backoff
+                    time.sleep(self.retry_delay * (2**attempt))  # Exponential backoff
         raise Exception(f"Failed to extract item {item_number} after {self.max_retries} attempts")
 
     def extract_dataset(self) -> str:
         """Extract the entire dataset"""
         items = {}
 
-        for i in range(1, self.total_items + 1):
-            try:
-                items[i] = self.get_item(i)
-            except Exception as e:
-                logger.error(f"Failed to get item {i}: {str(e)}")
+        with tqdm(total=self.total_items, desc="Extracting items") as pbar:
+            for i in range(1, self.total_items + 1):
+                try:
+                    items[i] = self.get_item(i)
+                    pbar.update(1)
+                except Exception as e:
+                    logger.error(f"Failed to get item {i}: {str(e)}")
 
         if len(items) != self.total_items:
             logger.warning(
@@ -79,9 +94,13 @@ class DatasetExtractor:
         Format the extracted dataset.
         This method can be overridden by subclasses if needed.
         """
-        return "\n".join(
-            f"# {items.get(i, {'title': f'Item {i}', 'content': '[Content missing]'})['title']}\n{items.get(i, {'content': ''})['content']}"
-            for i in range(1, self.total_items + 1)
+        # TODO: Un-hardcode the heading
+        return (
+            "# Harry Potter and the Methods of Rationality\n\nby Eliezer Yudkowsky\n\n"
+            + "\n\n\n".join(
+                f"## {items.get(i, {'title': f'Item {i}', 'content': '[Content missing]'})['title']}\n{items.get(i, {'content': ''})['content']}"
+                for i in range(1, self.total_items + 1)
+            )
         )
 
     def save_dataset(self, content: str, filename: str) -> None:
@@ -101,7 +120,7 @@ class WebPageExtractor(DatasetExtractor):
         base_url: str,
         route: str,
         total_items: int,
-        output_dir: Union[str, Path],
+        output_dir: str | Path,
         cache_key_prefix: str,
         title_selector: str,
         content_selector: str,
@@ -112,6 +131,12 @@ class WebPageExtractor(DatasetExtractor):
         self.title_selector = title_selector
         self.content_selector = content_selector
         self.content_processor = content_processor or (lambda x: x)
+
+    @cache.disk_cache(serializer="json")
+    def fetch_item(self, item_number: int) -> dict[str, str]:
+        logger.debug(f"Cache miss for item {item_number}. Extracting data.")
+        self._delay_if_needed()
+        return self.extract_item(item_number)
 
     def extract_item(self, item_number: int) -> dict[str, str]:
         url = f"{self.base_url}{self.route}{item_number}"
@@ -132,6 +157,9 @@ class WebPageExtractor(DatasetExtractor):
             raise ValueError(f"Failed to extract title or content from {url}")
 
         title = title_element.get_text(strip=True)
-        content = self.content_processor(str(content_element))
+        title = re.sub(r"\s+", " ", title) + "\n"
+
+        content = str(content_element)
+        content = self.content_processor(content)
 
         return {"title": title, "content": content}
