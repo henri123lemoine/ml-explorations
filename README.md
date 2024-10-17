@@ -30,31 +30,24 @@ uv run -m src.models.qwen
 2. Handle diverse input types (text, images, etc.)
 3. Streamline fine-tuning and reinforcement learning processes
 
-## TODO
+## TODOs
 
-1. Refactor base classes for models, inputs, and outputs
-   - [ ] Implement a flexible BaseModel class
-   - [ ] Create adaptable BaseInput and BaseOutput classes
-
-2. Implement new models using the refactored structure
-   - [ ] Update Qwen model implementation
-   - [ ] Create Aria model implementation
-
-3. Enhance input processing
-   - [ ] Develop a system to handle various input types
-   - [ ] Implement processors for text and image inputs
-
-4. Improve output handling
-   - [ ] Refine streaming and non-streaming output support
-   - [ ] Ensure consistency across different model types
-
-5. Update Pipeline class
-   - [ ] Adapt to work with new model, input, and output implementations
-   - [ ] Add support for multi-stage pipelines if needed
-
-6. Develop fine-tuning and RL capabilities
-   - [ ] Create a basic fine-tuning interface
-   - [ ] Implement initial RLHF, DPO, or IPO support
+- [x] Implement a flexible Model class
+- [x] Update Qwen model implementation
+- [x] Create Aria model implementation
+- [ ] Develop a system to handle various input types
+- [ ] Implement processors for text and image inputs
+- [ ] Ensure consistency across different model types
+- [ ] Remove unnecessary experiments code & refactor for clarity. Improve configuration
+- [ ] Create a basic fine-tuning interface for Qwen
+- [ ] Play with finetuning:
+  - `lora` or more modern methods
+- [ ] Play with RLHF/DPO/IPO/etc. Look into the following:
+  - `https://github.com/axolotl-ai-cloud/axolotl`
+  - `https://ericmitchell.ai/cdpo.pdf`
+  - `https://arxiv.org/pdf/2310.12036`
+- [ ] Play with SAEs
+  - `https://github.com/jbloomAus/SAELens`
 
 ## Testing
 
