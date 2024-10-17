@@ -1,5 +1,4 @@
 import logging
-from typing import List, Tuple
 
 import torch
 from torch import nn
@@ -216,7 +215,7 @@ class FrozenBERT(BERT):
 class BERTDataProcessor:
     def __init__(
         self,
-        data: Tuple[List[DataPoint], List[DataPoint], List[DataPoint]],
+        data: tuple[list[DataPoint], list[DataPoint], list[DataPoint]],
         model_name: BERT = None,
         batch_size: int = 64,
         max_length: int = 64,
@@ -225,7 +224,7 @@ class BERTDataProcessor:
         Initializes the BERTDataProcessor with the dataset, model name, maximum sequence length, and batch size.
 
         Parameters:
-        - data: List of lists containing DataPoint objects for each dataset partition (train, validation, test).
+        - data: list of lists containing DataPoint objects for each dataset partition (train, validation, test).
         - model_name: The name of the BERT model to be used for tokenization.
         - max_length: The maximum length of the sequences after tokenization.
         - batch_size: The size of the batches for the DataLoader.
@@ -260,7 +259,7 @@ class BERTDataProcessor:
         """
         return [self._create_dataloader(partition) for partition in self.data]
 
-    def _create_dataloader(self, data_partition: List[DataPoint]):
+    def _create_dataloader(self, data_partition: list[DataPoint]):
         """
         Tokenizes a data partition and creates a DataLoader.
 
@@ -277,7 +276,7 @@ class BERTDataProcessor:
         )
         return DataLoader(dataset, sampler=sampler, batch_size=self.batch_size)
 
-    def _tokenize_data(self, data_partition: List[DataPoint]):
+    def _tokenize_data(self, data_partition: list[DataPoint]):
         """
         Tokenizes the texts in a data partition.
 
@@ -285,7 +284,7 @@ class BERTDataProcessor:
         - data_partition: A list of DataPoint objects to be tokenized.
 
         Returns:
-        - Tuple of lists containing tokenized input IDs, attention masks, and labels.
+        - tuple of lists containing tokenized input IDs, attention masks, and labels.
         """
         input_ids, attention_masks, labels = [], [], []
 

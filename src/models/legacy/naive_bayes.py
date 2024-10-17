@@ -1,6 +1,5 @@
 import logging
 from functools import reduce
-from typing import List, Tuple
 
 import numpy as np
 from scipy import sparse
@@ -83,7 +82,7 @@ class NaiveBayes(Model):
 
 class NaiveBayesDataProcessor:
     def __init__(
-        self, data: List[List[DataPoint]], representation_type="count", vectorizer_params={}
+        self, data: list[list[DataPoint]], representation_type="count", vectorizer_params={}
     ):
         self.data = data
         self.representation_type = representation_type
@@ -91,12 +90,12 @@ class NaiveBayesDataProcessor:
         self.vectorizer = None
         self.transformer = None
 
-    def preprocess(self) -> List[Tuple[np.ndarray, np.ndarray]]:
+    def preprocess(self) -> list[tuple[np.ndarray, np.ndarray]]:
         """
         Preprocess data by converting text into numerical features using different representation types.
 
         Parameters:
-        - data: List of lists where each sublist contains DataPoint objects for a dataset partition (train, validation, test).
+        - data: list of lists where each sublist contains DataPoint objects for a dataset partition (train, validation, test).
         - representation_type: The type of feature representation to use: 'count', 'binary', or 'tfidf'.
         - vectorizer_params: Parameters to pass to the CountVectorizer.
 
