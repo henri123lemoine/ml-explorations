@@ -8,12 +8,17 @@ dependencies = [
     "accelerate>=1.0.1",
     "anthropic>=0.34",
     "bertviz>=1.4.0",
+    "bs4>=0.0.2",
     "datasets>=3.0.1",
     "ell-ai[all]>=0.0.14",
+    "gymnasium>=1.0.0",
     "huggingface-hub>=0.25.2",
+    "imageio>=2.36.0",
     "importlib-metadata>=8.5.0",
     "ipykernel>=6.29.5",
+    "markdownify>=0.13.1",
     "matplotlib>=3.9.2",
+    "moviepy>=1.0.3",
     "numpy>=2.1.2",
     "openai>=1.51.2",
     "pandas>=2.2.3",
@@ -29,9 +34,13 @@ dependencies = [
     "seaborn>=0.13.2",
     "sentencepiece>=0.2.0",
     "tabulate>=0.9.0",
+    "tensorboard>=2.18.0",
     "torch>=2.4.1",
     "torchaudio>=2.4.1",
     "torchvision>=0.19.1",
     "tqdm>=4.66.5",
     "transformers>=4.45.2",
 ]
+
+# [tool.uv.sources]
+# stable-baselines3 = { git = "https://github.com/DLR-RM/stable-baselines3" }

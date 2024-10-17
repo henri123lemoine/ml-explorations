@@ -3,8 +3,6 @@ from typing import Any, Generator
 import requests
 import torch
 from PIL import Image
-
-# Set logging level to suppress info messages
 from transformers import AutoModelForCausalLM, AutoProcessor, logging
 
 from src.models.base import Model

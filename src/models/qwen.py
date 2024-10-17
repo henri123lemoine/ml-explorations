@@ -12,7 +12,6 @@ from transformers import (
 
 from src.models.base import Model
 
-# Set logging level to suppress info messages
 logging.set_verbosity_error()
 
 
