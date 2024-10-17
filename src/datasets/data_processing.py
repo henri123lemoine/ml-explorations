@@ -24,35 +24,6 @@ def one_hot_decode(y, classes):
     return classes[np.argmax(y, axis=1)]
 
 
-def k_fold_cross_validation(model, X, y, metric_function, k=5):
-    n = len(y)
-    indices = np.random.permutation(n)
-    fold_sizes = [(n // k) + 1 if p < n % k else n // k for p in range(k)]
-    current = 0
-    folds = []
-    for fold_size in fold_sizes:
-        start, stop = current, current + fold_size
-        folds.append(indices[start:stop])
-        current = stop
-
-    scores = []
-
-    for fold in folds:
-        test_index = fold
-        train_index = [idx for idx in indices if idx not in fold]
-
-        X_train, X_test = X[train_index], X[test_index]
-        y_train, y_test = y[train_index], y[test_index]
-
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-
-        score = metric_function(y_test, y_pred)
-        scores.append(score)
-
-    return scores
-
-
 def train_test_split(X, y, split_ratio=0.8):
     shuffle_idx = np.random.permutation(len(y))
     train_size = int(split_ratio * len(y))
