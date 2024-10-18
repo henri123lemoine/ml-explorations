@@ -3,6 +3,7 @@ from typing import Any, Generator
 import requests
 import torch
 from PIL import Image
+from torch import nn
 from transformers import AutoModelForCausalLM, AutoProcessor, logging
 
 from src.models.base import Model
@@ -12,7 +13,8 @@ logging.set_verbosity_error()
 
 class AriaModel(Model):
     def __init__(self):
-        self.model = None
+        super().__init__()
+        self.model: nn.Module | None = None
         self.processor = None
 
     def load(self, path: str = "rhymes-ai/Aria", **kwargs):
@@ -35,8 +37,17 @@ class AriaModel(Model):
         else:
             return self._generate_non_stream(inputs)
 
-    def train(self, training_data: Any, training_config: dict[str, Any]):
+    def fit(self, X: Any, y: Any):
         raise NotImplementedError("Training not implemented for Aria model yet")
+
+    def predict(self, X: Any) -> Any:
+        raise NotImplementedError("Predict method not implemented for Aria model")
+
+    def evaluate(self, X: Any, y: Any) -> dict[str, float]:
+        raise NotImplementedError("Evaluate method not implemented for Aria model")
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.model(x)
 
     def _generate_non_stream(self, inputs: dict[str, Any]) -> str:
         with torch.inference_mode(), torch.amp.autocast("cuda", dtype=torch.bfloat16):

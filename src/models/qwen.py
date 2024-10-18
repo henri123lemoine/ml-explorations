@@ -2,6 +2,7 @@ from threading import Thread
 from typing import Any, Generator
 
 import torch
+from torch import nn
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -27,8 +28,9 @@ class QwenModel(Model):
     """
 
     def __init__(self, model_name: str = "Qwen/Qwen2-0.5B-Instruct"):
+        super().__init__()
         self.model_name = model_name
-        self.model = None
+        self.model: nn.Module | None = None
         self.tokenizer: PreTrainedTokenizerBase | None = None
 
     def load(self, path: str = None, **kwargs):
@@ -47,16 +49,25 @@ class QwenModel(Model):
         else:
             return self._generate_non_stream(inputs)
 
-    def train(self, training_data: Any, training_config: dict[str, Any]):
+    def fit(self, X: Any, y: Any):
         raise NotImplementedError("Training not implemented for Qwen model yet")
 
+    def predict(self, X: Any) -> Any:
+        raise NotImplementedError("Predict method not implemented for Qwen model")
+
+    def evaluate(self, X: Any, y: Any) -> dict[str, float]:
+        raise NotImplementedError("Evaluate method not implemented for Qwen model")
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.model(x)
+
     def _generate_non_stream(self, inputs: dict[str, torch.Tensor]) -> str:
-        inputs = inputs.to(self.model.device)
+        inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
         output = self.model.generate(**inputs, max_new_tokens=512)
         return self.tokenizer.decode(output[0], skip_special_tokens=True)
 
     def _generate_stream(self, inputs: dict[str, torch.Tensor]) -> Generator[str, None, None]:
-        inputs = inputs.to(self.model.device)
+        inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
         streamer = TextIteratorStreamer(self.tokenizer, skip_prompt=True, skip_special_tokens=True)
         generation_kwargs = dict(inputs, streamer=streamer, max_new_tokens=512)
 

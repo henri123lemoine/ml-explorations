@@ -1,29 +1,53 @@
-from abc import ABC, abstractmethod
-from typing import Any
+import pickle
+from pathlib import Path
+from typing import Any, Dict
+
+import torch
+import torch.nn as nn
+
+from src.settings import CACHE_PATH
 
 
-class Model(ABC):
-    @abstractmethod
-    def save(self, path):
-        pass
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
 
-    @abstractmethod
-    def load(cls, path):
-        pass
+    def save(self, path: str):
+        torch.save(self.state_dict(), path)
 
-    @abstractmethod
-    def generate(self, inputs: dict[str, Any], streaming: bool = False) -> Any:
-        pass
+    @classmethod
+    def load(cls, path: str):
+        model = cls()
+        model.load_state_dict(torch.load(path))
+        return model
 
-    @abstractmethod
-    def train(self, training_data: Any, training_config: dict[str, Any]):
-        pass
+    def save_complete_model(
+        self, file_name: str = None, dir_path: Path | str = CACHE_PATH, ext: str = "pth"
+    ):
+        if file_name is None:
+            file_name = self.__class__.__name__
+        file_path = dir_path / f"{file_name}_cls.{ext}"
+        with open(file_path, "wb") as f:
+            pickle.dump(self, f)
 
-    def fit(self, X, y):
-        raise NotImplementedError("This model does not support the fit method")
+    @classmethod
+    def load_complete_model(
+        cls, file_name: str = None, dir_path: Path | str = CACHE_PATH, ext: str = "pth"
+    ):
+        if file_name is None:
+            file_name = cls.__name__
+        file_path = dir_path / f"{file_name}_cls.{ext}"
+        with open(file_path, "rb") as f:
+            return pickle.load(f)
 
-    def predict(self, X):
-        raise NotImplementedError("This model does not support the predict method")
+    def fit(self, X: Any, y: Any):
+        raise NotImplementedError("Subclasses must implement fit method")
 
-    def evaluate(self, X, y):
-        raise NotImplementedError("This model does not support the evaluate method")
+    def predict(self, X: Any) -> Any:
+        raise NotImplementedError("Subclasses must implement predict method")
+
+    def evaluate(self, X: Any, y: Any) -> Dict[str, float]:
+        raise NotImplementedError("Subclasses must implement evaluate method")
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        raise NotImplementedError("Subclasses must implement forward method")
