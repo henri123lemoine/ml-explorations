@@ -8,9 +8,6 @@ logger = logging.getLogger(__name__)
 np.random.seed(0)
 
 
-# ------------------------------ INITIALIZERS ------------------------------
-
-
 class Initializer(ABC):
     @abstractmethod
     def initialize(self, size_in, size_out):
