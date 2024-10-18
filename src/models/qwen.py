@@ -27,17 +27,18 @@ class QwenModel(Model):
     - https://github.com/QwenLM/Qwen2.5
     """
 
-    def __init__(self, model_name: str = "Qwen/Qwen2-0.5B-Instruct"):
+    def __init__(
+        self, model_name: str = "unsloth/Qwen2.5-0.5B-bnb-4bit"
+    ):  # "Qwen/Qwen2-0.5B-Instruct"
         super().__init__()
         self.model_name = model_name
-        self.model: nn.Module | None = None
-        self.tokenizer: PreTrainedTokenizerBase | None = None
-
-    def load(self, path: str = None, **kwargs):
-        self.model = AutoModelForCausalLM.from_pretrained(
-            path or self.model_name, torch_dtype=torch.float16, device_map="auto"
+        self.model: nn.Module = AutoModelForCausalLM.from_pretrained(
+            self.model_name, torch_dtype=torch.float16, device_map="auto"
         )
-        self.tokenizer = AutoTokenizer.from_pretrained(path or self.model_name)
+        # self.tokenizer: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained(self.model_name)
+        self.tokenizer: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained(
+            "Qwen/Qwen2-0.5B-Instruct"
+        )
 
     def save(self, save_path: str):
         self.model.save_pretrained(save_path)
@@ -82,7 +83,6 @@ class QwenModel(Model):
 
 if __name__ == "__main__":
     model = QwenModel()
-    model.load()
 
     prompt = "Tell me a short joke"
     messages = [
