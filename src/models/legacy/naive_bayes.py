@@ -6,8 +6,7 @@ from scipy import sparse
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 from src.datasets.retrieval import DataPoint
-
-from .model import Model
+from src.models.base import Model
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +62,7 @@ class NaiveBayes(Model):
         log_posteriors = X @ self.log_likelihoods.T + self.log_priors
         return log_posteriors.argmax(axis=1)
 
-    def evaluate(self, X: np.ndarray, y: np.ndarray) -> float:
+    def evaluate(self, X: np.ndarray, y: np.ndarray) -> dict[str, float]:
         """
         Evaluate the accuracy of the Naive Bayes model on the given test data and labels.
 
@@ -74,7 +73,29 @@ class NaiveBayes(Model):
         Returns:
         - accuracy: float, The accuracy of the model on the test set.
         """
-        return (self.predict(X) == y).mean()
+        accuracy = (self.predict(X) == y).mean()
+        return {"accuracy": accuracy}
+
+    def forward(self, x: np.ndarray) -> np.ndarray:
+        # For compatibility with PyTorch models
+        return self.predict(x)
+
+    def save(self, save_path: str):
+        np.savez(
+            save_path,
+            log_priors=self.log_priors,
+            log_likelihoods=self.log_likelihoods,
+            classes=self.classes,
+        )
+
+    @classmethod
+    def load(cls, load_path: str):
+        data = np.load(load_path)
+        model = cls()
+        model.log_priors = data["log_priors"]
+        model.log_likelihoods = data["log_likelihoods"]
+        model.classes = data["classes"]
+        return model
 
 
 # -------------------------------- PREPROCESSING -------------------------------

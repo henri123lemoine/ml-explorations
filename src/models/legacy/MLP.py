@@ -3,22 +3,18 @@ from typing import Type
 
 import numpy as np
 
+from src.models.base import Model
+from src.models.utils.activations import Activation, ReLU
+from src.models.utils.initializers import Initializer, Xavier
+from src.models.utils.losses import CrossEntropy, Loss
+from src.models.utils.optimizers import GD, Optimizer
+from src.models.utils.regularizers import None_, Regularizer
+from src.models.utils.schedulers import CosineAnnealing, LRScheduler
 from src.utils.metrics import accuracy
-
-from .utils.activations import Activation, ReLU
-from .utils.initializers import Initializer, Xavier
-from .utils.losses import CrossEntropy, Loss
-from .utils.optimizers import GD, Optimizer
-from .utils.regularizers import None_, Regularizer
-from .utils.schedulers import CosineAnnealing, LRScheduler
 
 logger = logging.getLogger(__name__)
 
 np.random.seed(0)
-
-
-class Model:
-    pass
 
 
 class MLP(Model):

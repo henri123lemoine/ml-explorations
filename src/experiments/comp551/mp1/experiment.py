@@ -22,7 +22,7 @@ from src.utils.visualization import plot1, print_table
 
 # ---------------------------------- controls ----------------------------------
 
-print_output_to_file = True
+print_output_to_file = False
 basic_stats = True
 basic_experiment = True
 experiment_1 = True

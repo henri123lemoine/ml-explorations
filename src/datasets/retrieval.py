@@ -1,5 +1,4 @@
 import logging
-import os
 from dataclasses import dataclass
 
 import numpy as np
@@ -57,8 +56,6 @@ def load_dataset(
         torch.manual_seed(random_state)
         np.random.seed(random_state)
 
-    os.makedirs(data_dir, exist_ok=True)
-
     transform_list = [transforms.ToTensor()]
 
     # Load the dataset to compute stats
@@ -105,17 +102,13 @@ class DataPoint:
 def get_dataset(print_info=False):
     # https://huggingface.co/datasets/dair-ai/emotion
 
-    dataset_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../cache/dataset_cache")
-    )
-
     datasets.logging.set_verbosity(datasets.logging.ERROR)
 
-    train_dataset = datasets.load_dataset("dair-ai/emotion", cache_dir=dataset_path, split="train")
+    train_dataset = datasets.load_dataset("dair-ai/emotion", cache_dir=DATASETS_PATH, split="train")
     validation_dataset = datasets.load_dataset(
-        "dair-ai/emotion", cache_dir=dataset_path, split="validation"
+        "dair-ai/emotion", cache_dir=DATASETS_PATH, split="validation"
     )
-    test_dataset = datasets.load_dataset("dair-ai/emotion", cache_dir=dataset_path, split="test")
+    test_dataset = datasets.load_dataset("dair-ai/emotion", cache_dir=DATASETS_PATH, split="test")
 
     # convert from IterableDataset to shuffled list
     # convert items from {'text': '...', 'label': i} to DataPoint('...', i)

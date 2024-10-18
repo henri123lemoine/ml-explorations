@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import torch
 from torch import nn
@@ -12,7 +13,7 @@ from transformers import (
 )
 
 from src.datasets.retrieval import DataPoint
-from src.models.legacy.model import Model
+from src.models.base import Model
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class BERT(Model):
     def __init__(self, model_name, num_labels, batch_size, device=DEVICE):
+        super().__init__()
         if model_name == "bert-base-uncased":
             self.model = BertForSequenceClassification.from_pretrained(
                 model_name,
@@ -47,9 +49,6 @@ class BERT(Model):
         )
 
     def fit(self, train_dataloader, optimizer: Optimizer, scheduler: LRScheduler, epochs: int):
-        """
-        Take training data (X and Y) and other hyperparameters (LR and GD iterations) as inputs. Train.
-        """
         losses = []
         for epoch in range(epochs):
             self.model.train()
@@ -76,11 +75,7 @@ class BERT(Model):
         return losses
 
     def predict(self, dataloader):
-        """
-        Output Y^ (prediction) for a set of X (input features).
-        """
         self.model.eval()
-
         predictions = []
 
         with torch.no_grad():
@@ -95,12 +90,7 @@ class BERT(Model):
         return predictions
 
     def evaluate(self, dataloader):
-        """
-        Evaluate model accuracy, take Y (true labels) and target labels (Y^) and output accuracy score.
-        """
-
         self.model.eval()
-
         correct = 0
         total = 0
 
@@ -118,29 +108,32 @@ class BERT(Model):
                 total += b_labels.size(0)
 
         accuracy = correct / total
-        return accuracy
+        return {"accuracy": accuracy}
 
-    def save(self, file_name: str = None, dir_path: str = "cache", ext: str = "pth"):
-        if file_name is None:
-            file_name = self.__class__.__name__
-        file_path = f"{dir_path}/{file_name}_weights.{ext}"
-        torch.save(self.model.state_dict(), file_path)
+    def save(self, save_path: Path | str):
+        # TODO:
+        # if file_name is None:
+        #     file_name = self.__class__.__name__
+        # file_path = f"{dir_path}/{file_name}_weights.{ext}"
+        torch.save(self.model.state_dict(), save_path)
 
     @classmethod
     def load(
         cls,
-        file_name: str = None,
-        dir_path: str = "cache",
-        ext: str = "pth",
-        batch_size=64,
+        load_path: Path | str,
+        model_name: str,
+        num_labels: int,
+        batch_size: int = 64,
         device=DEVICE,
     ):
-        if file_name is None:
-            file_name = cls.__name__
-        file_path = f"{dir_path}/{file_name}_weights.{ext}"
-        model = cls(batch_size=batch_size)
-        model.model.load_state_dict(torch.load(file_path))
-        model.model.to(device)
+        # TODO:
+        # if file_name is None:
+        #     file_name = cls.__name__
+        # file_path = f"{dir_path}/{file_name}_weights.{ext}"
+
+        model = cls(model_name, num_labels, batch_size, device)
+        model.model.load_state_dict(torch.load(load_path))
+        # model.model.to(device)
         return model
 
 

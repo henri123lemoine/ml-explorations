@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+from src.models.base import Model
 from src.utils.metrics import accuracy
 
 logger = logging.getLogger(__name__)
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 np.random.seed(0)
 
 
-class CNN(nn.Module):
+class CNN(Model):
     def __init__(
         self,
         num_channels=3,

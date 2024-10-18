@@ -1,5 +1,4 @@
 import logging
-import os
 import random
 import sys
 import time
@@ -26,7 +25,6 @@ from src.models.legacy.bert import (
     PrefinetunedBERT,
 )
 from src.models.legacy.naive_bayes import NaiveBayes, NaiveBayesDataProcessor
-from src.settings import CACHE_PATH
 from src.utils.visualization import plot
 
 colors = ["r", "b", "g", "c", "m", "y", "k", "w"]
@@ -486,11 +484,6 @@ def main(experiments_to_run):
     global_parameters = cast(dict[str, Any], populate_from_context(global_parameters))
 
     experiments_to_run = experiments_to_run or list(experiments_info.keys())
-
-    # if we have CACHE_PARTIAL_RESULTS and cache directory does not exist, create it
-    if global_parameters.get("CACHE_PARTIAL_RESULTS", False):
-        if not os.path.exists(CACHE_PATH):
-            os.makedirs(CACHE_PATH)
 
     OUTPUT_FILE = global_parameters["OUTPUT_FILE"]
     sys.stdout = sys.stdout if OUTPUT_FILE is None else open(OUTPUT_FILE, "w")

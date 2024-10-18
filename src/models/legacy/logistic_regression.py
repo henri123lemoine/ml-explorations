@@ -8,23 +8,12 @@ from src.datasets.data_processing import (
     one_hot_encode,
     softmax,
 )
-from src.utils.optimization import gradient_descent, stochastic_gradient_descent
+from src.models.base import Model
+from src.models.utils.optimizers import gradient_descent, stochastic_gradient_descent
 
 logger = logging.getLogger(__name__)
 
 np.random.seed(0)
-
-
-class Model:
-    # this should have a way to fit the model to some data
-    def fit(self, X, Y):
-        del X, Y
-        raise NotImplementedError("Subclass must implement fit method")
-
-    # and a way to predict the output of the model given some data
-    def predict(self, X):
-        del X
-        raise NotImplementedError("Subclass must implement predict method")
 
 
 class LogisticRegression(Model):

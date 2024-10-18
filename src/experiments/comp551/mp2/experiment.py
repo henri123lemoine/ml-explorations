@@ -15,7 +15,7 @@ import torchvision.models as models
 from src.datasets.retrieval import load_dataset
 from src.models.legacy.CNN import CNN
 from src.models.legacy.MLP import MLP
-from src.models.legacy.utils import *
+from src.models.utils import *
 from src.settings import CACHE_PATH
 from src.utils.config import load_config
 from src.utils.visualization import plot
