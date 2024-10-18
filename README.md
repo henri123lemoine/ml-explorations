@@ -37,17 +37,10 @@ uv run -m src.models.qwen
 - [x] Create Aria model implementation
 - [ ] Develop a system to handle various input types
 - [ ] Implement processors for text and image inputs
-- [ ] Ensure consistency across different model types
+- [x] Ensure consistency across different model types
 - [ ] Remove unnecessary experiments code & refactor for clarity. Improve configuration
-- [ ] Create a basic fine-tuning interface for Qwen
-- [ ] Play with finetuning:
-  - `lora` or more modern methods
-- [ ] Play with RLHF/DPO/IPO/etc. Look into the following:
-  - `https://github.com/axolotl-ai-cloud/axolotl`
-  - `https://ericmitchell.ai/cdpo.pdf`
-  - `https://arxiv.org/pdf/2310.12036`
-- [ ] Play with SAEs
-  - `https://github.com/jbloomAus/SAELens`
+- [ ] [Finetuning](src/experiments/finetuning/README.md)
+- [ ] Play with SAEs `https://github.com/jbloomAus/SAELens`
 
 ## Testing
 
