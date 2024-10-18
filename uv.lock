@@ -201,6 +201,18 @@ wheels = [
 ]
 
 [[package]]
+name = "bitsandbytes"
+version = "0.42.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/95/a4/ee1a5c53a622ff6e68378e6f9f76f43ad8cadf440da53bb3bcc0bde30eb1/bitsandbytes-0.42.0.tar.gz", hash = "sha256:fc1505f184f0d275766f2a6c663f1a43b734c1409b5c5a406f3a6073d9f329fd", size = 103205096 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9b/63/489ef9cd7a33c1f08f1b2be51d1b511883c5e34591aaa9873b30021cd679/bitsandbytes-0.42.0-py3-none-any.whl", hash = "sha256:63798680912cc63bb77b535a2d0860af024e290a52e157f777ad2a52e2585967", size = 104960014 },
+]
+
+[[package]]
 name = "black"
 version = "24.10.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1113,6 +1125,7 @@ dependencies = [
     { name = "accelerate" },
     { name = "anthropic" },
     { name = "bertviz" },
+    { name = "bitsandbytes" },
     { name = "bs4" },
     { name = "datasets" },
     { name = "ell-ai", extra = ["all"] },
@@ -1123,6 +1136,7 @@ dependencies = [
     { name = "ipykernel" },
     { name = "markdownify" },
     { name = "matplotlib" },
+    { name = "mlx-lm" },
     { name = "moviepy" },
     { name = "numpy" },
     { name = "openai" },
@@ -1152,6 +1166,7 @@ requires-dist = [
     { name = "accelerate", specifier = ">=1.0.1" },
     { name = "anthropic", specifier = ">=0.34" },
     { name = "bertviz", specifier = ">=1.4.0" },
+    { name = "bitsandbytes", specifier = "==0.42" },
     { name = "bs4", specifier = ">=0.0.2" },
     { name = "datasets", specifier = ">=3.0.1" },
     { name = "ell-ai", extras = ["all"], specifier = ">=0.0.14" },
@@ -1162,6 +1177,7 @@ requires-dist = [
     { name = "ipykernel", specifier = ">=6.29.5" },
     { name = "markdownify", specifier = ">=0.13.1" },
     { name = "matplotlib", specifier = ">=3.9.2" },
+    { name = "mlx-lm", specifier = ">=0.19.1" },
     { name = "moviepy", specifier = ">=1.0.3" },
     { name = "numpy", specifier = ">=2.1.2" },
     { name = "openai", specifier = ">=1.51.2" },
@@ -1313,6 +1329,32 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba", size = 8729 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979 },
+]
+
+[[package]]
+name = "mlx"
+version = "0.18.1"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/56/5f/e11426b47b42dc0313cc91a985b39a3404f8c137160c11a9c40af3547377/mlx-0.18.1-cp312-cp312-macosx_13_0_arm64.whl", hash = "sha256:c594a49a4adb6fa243aa1ef5275ad142a62b0f4febfac1dd747a43390325c11d", size = 22046857 },
+    { url = "https://files.pythonhosted.org/packages/2b/92/23d87d2f249601ad045a04b86413f90560b0da8b26684fbd2afa58754b02/mlx-0.18.1-cp312-cp312-macosx_14_0_arm64.whl", hash = "sha256:d67b4d818e8172a014c0b3bcee17b938105ec468583be06eb8ca76d89605ed11", size = 21302125 },
+]
+
+[[package]]
+name = "mlx-lm"
+version = "0.19.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "jinja2" },
+    { name = "mlx" },
+    { name = "numpy" },
+    { name = "protobuf" },
+    { name = "pyyaml" },
+    { name = "transformers", extra = ["sentencepiece"] },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9b/fd/c4a297bbc412aa84b4a457adefc05f4a01bbac7866ef5212c062027ce012/mlx_lm-0.19.1.tar.gz", hash = "sha256:865c04e4a788a6f42a037533d2bae28ce62687a58400bf073adccced366c8a75", size = 88111 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e8/59/95b18d5db008ed84c6cf49503eec155343a4406114845291f9f0ea08b750/mlx_lm-0.19.1-py3-none-any.whl", hash = "sha256:39034a0fcbc4b6624fa3a58c4d015754ef0fd385ed2312bee767762693633b3c", size = 115227 },
 ]
 
 [[package]]
@@ -2592,6 +2634,12 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/4b/4c/3862b2dd6cdf83b187897bd351da0f7fb74d0df642b03c6f5d06353a3ca0/transformers-4.45.2.tar.gz", hash = "sha256:72bc390f6b203892561f05f86bbfaa0e234aab8e927a83e62b9d92ea7e3ae101", size = 8478357 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f9/9d/030cc1b3e88172967e22ee1d012e0d5e0384eb70d2a098d1669d549aea29/transformers-4.45.2-py3-none-any.whl", hash = "sha256:c551b33660cfc815bae1f9f097ecfd1e65be623f13c6ee0dda372bd881460210", size = 9881312 },
+]
+
+[package.optional-dependencies]
+sentencepiece = [
+    { name = "protobuf" },
+    { name = "sentencepiece" },
 ]
 
 [[package]]
