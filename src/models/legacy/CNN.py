@@ -16,12 +16,12 @@ np.random.seed(0)
 class CNN(Model):
     def __init__(
         self,
-        num_channels=3,
-        image_size=32,
-        num_classes=10,
+        num_channels: int = 3,
+        image_size: int = 32,
+        num_classes: int = 10,
         optimizer=optim.Adam,
         loss_function=nn.CrossEntropyLoss,
-        lr=0.001,
+        lr: float = 0.001,
         **kwargs,
     ):
         super(CNN, self).__init__()
@@ -57,7 +57,14 @@ class CNN(Model):
         x = self.fc_layers(x)
         return x
 
-    def train_loop(self, trainloader, testloader, epochs=100, print_loss=False, log_interval=10):
+    def train_loop(
+        self,
+        trainloader,
+        testloader,
+        epochs: int = 100,
+        print_loss: bool = False,
+        log_interval: int = 10,
+    ):
         train_accuracies = []
         test_accuracies = []
 

@@ -18,7 +18,7 @@ from src.models.legacy.logistic_regression import (
 )
 from src.settings import DATASETS_PATH
 from src.utils.metrics import MSE, accuracy, f1_score, precision, recall
-from src.utils.visualization import plot1, print_table
+from src.utils.visualization import plot2, print_table
 
 # ---------------------------------- controls ----------------------------------
 
@@ -467,14 +467,17 @@ if experiment_3:
     # Linear Regression on Boston Dataset
     max_y = data_boston.max() * 1.2
 
-    plot1(
+    plot2(
         data=data_boston,
         title="Performance vs. Training Size (Boston Dataset - Linear Regression)",
         main_labels=["Training Size"] + dim_1_boston,
         ax_titles=["Mean Squared Error"],
-        algs_info=[("Train", "b", 2), ("Test", "r", 2)],
-        range_y=[[0, max_y]],
-        x_axis_relative_range=[-1, -0.7],
+        algs_info=[
+            ("Train", "b", "scatter"),
+            ("Test", "r", "scatter"),
+        ],
+        range_y=[(0, max_y)],
+        range_x=(0, len(train_sizes) - 1),
         custom_x_labels=[f"{size * 100:.0f}%" for size in train_sizes],
         plot_box=Bbox([[0, 0], [10, 10]]),
         filename=PLOTS_PATH / "experiment_3_boston.png" if SAVE_FILES else None,
@@ -485,14 +488,17 @@ if experiment_3:
     max_y = 1.0
     min_y = data_wine.min() * 0.8
 
-    plot1(
+    plot2(
         data=data_wine,
         title="Performance vs. Training Size (Wine Dataset - Logistic Regression)",
         main_labels=["Training Size"] + dim_1_wine,
         ax_titles=dim_1_wine,
-        algs_info=[("Train", "b", 2), ("Test", "r", 2)],
-        range_y=[[min_y, max_y], [min_y, max_y], [min_y, max_y], [min_y, max_y]],
-        x_axis_relative_range=[-1, -0.7],
+        algs_info=[
+            ("Train", "b", "scatter"),
+            ("Test", "r", "scatter"),
+        ],
+        range_y=[(min_y, max_y), (min_y, max_y), (min_y, max_y), (min_y, max_y)],
+        range_x=(0, len(train_sizes) - 1),
         custom_x_labels=[f"{size * 100:.0f}%" for size in train_sizes],
         plot_box=Bbox([[0, 0], [10, 10]]),
         filename=PLOTS_PATH / "experiment_3_wine.png" if SAVE_FILES else None,
@@ -679,14 +685,14 @@ if experiment_5:
     min_y = data_boston.min() * 0.8
     max_y = data_boston.max() * 1.2
 
-    plot1(
+    plot2(
         data=data_boston,
         title="Performance vs. Learning Rate",
         main_labels=["Learning Rate"] + dim_1_boston,
         ax_titles=dim_1_boston,
-        algs_info=[("Learning Rate", "b", 0)],
-        range_y=[[0, max_y]],
-        x_axis_relative_range=[-0.1, -0.9],
+        algs_info=[("Learning Rate", "b", "line")],
+        range_y=[(0, max_y)],
+        range_x=(0, len(learning_rates) - 1),
         fill_std=[0],
         custom_x_labels=[str(rate) for rate in learning_rates],
         plot_box=Bbox([[0, 0], [10, 10]]),
@@ -697,21 +703,25 @@ if experiment_5:
     min_y = data_wine.min() * 0.8
     max_y = 1.0
 
-    plot1(
+    plot2(
         data=data_wine,
         title="Performance vs. Learning Rate",
         main_labels=["Learning Rate"] + dim_1_wine,
         ax_titles=dim_1_wine,
-        algs_info=[("Learning Rate", "b", 0)],
-        range_y=[[min_y, max_y], [min_y, max_y], [min_y, max_y], [min_y, max_y]],
-        x_axis_relative_range=[-0.1, -0.9],
-        fill_std=[0] * len(dim_1_wine),
+        algs_info=[("Learning Rate", "b", "line")],
+        range_y=[
+            (min_y, max_y),
+            (min_y, max_y),
+            (min_y, max_y),
+            (min_y, max_y),
+        ],
+        range_x=(0, len(learning_rates) - 1),
+        fill_std=[0 if i == 0 else None for i in range(len(dim_1_wine))],
         custom_x_labels=[str(rate) for rate in learning_rates],
         plot_box=Bbox([[0, 0], [10, 10]]),
         filename=PLOTS_PATH / "experiment_5_wine.png" if SAVE_FILES else None,
         show=SHOW_GRAPHS,
     )
-
 
 # -------------------------------- Experiment 6 --------------------------------
 
@@ -827,32 +837,34 @@ if experiment_6:
         (
             f"LR: {learning_rate}",
             compute_color(learning_rate, min(learning_rates), max(learning_rates)),
-            0,
+            "line",
         )
         for learning_rate in learning_rates
     ]
 
     # Plotting
-    plot1(
+    plot2(
         data=data_boston,
         title="Performance vs. Learning Rate and Batch Size (Boston-LR)",
         main_labels=["Batch Size"] + dim_1_boston,
         ax_titles=dim_1_boston,
         algs_info=alg_info,
-        fill_std=[0],
+        fill_std=[0 if i == 0 else None for i in range(len(dim_1_boston))],
+        range_x=(0, len(batch_sizes) - 1),
         custom_x_labels=[str(batch_size) for batch_size in batch_sizes],
         plot_box=Bbox([[0, 0], [10, 10]]),
         filename=PLOTS_PATH / "experiment_6_boston.png" if SAVE_FILES else None,
         show=SHOW_GRAPHS,
     )
 
-    plot1(
+    plot2(
         data=data_wine,
         title="Performance vs. Learning Rate and Batch Size (Wine-LogR)",
         main_labels=["Batch Size"] + dim_1_wine,
         ax_titles=dim_1_wine,
         algs_info=alg_info,
-        fill_std=[0] * len(dim_1_wine),
+        fill_std=[0 if i == 0 else None for i in range(len(dim_1_wine))],
+        range_x=(0, len(batch_sizes) - 1),
         custom_x_labels=[str(batch_size) for batch_size in batch_sizes],
         plot_box=Bbox([[0, 0], [10, 10]]),
         filename=PLOTS_PATH / "experiment_6_wine.png" if SAVE_FILES else None,

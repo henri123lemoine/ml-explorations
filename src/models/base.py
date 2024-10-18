@@ -22,7 +22,7 @@ class Model(nn.Module):
         return model
 
     def save_complete_model(
-        self, file_name: str = None, dir_path: Path | str = CACHE_PATH, ext: str = "pth"
+        self, file_name: str | None = None, dir_path: Path = CACHE_PATH, ext: str = "pth"
     ):
         if file_name is None:
             file_name = self.__class__.__name__
@@ -32,7 +32,7 @@ class Model(nn.Module):
 
     @classmethod
     def load_complete_model(
-        cls, file_name: str = None, dir_path: Path | str = CACHE_PATH, ext: str = "pth"
+        cls, file_name: str | None = None, dir_path: Path = CACHE_PATH, ext: str = "pth"
     ):
         if file_name is None:
             file_name = cls.__name__
