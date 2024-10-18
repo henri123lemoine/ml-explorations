@@ -10,6 +10,8 @@ Importance of hyperparameters, esp. batch size and learning rate. For Boston, ba
 
 Gaussian Basis Transformation worsened the Boston model (lead to overfitting). The analytical solution outperformed SGD.
 
+TODO: Currently broken
+
 ## Contributors
 
 Fraser Ross Lee, Jingxiang Mo and Henri Lemoine.

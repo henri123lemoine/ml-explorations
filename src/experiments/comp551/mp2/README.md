@@ -4,7 +4,7 @@ This experiment was conducted as part of COMP551. We implement MLPs and CNNs and
 
 ## Results
 
-TODO
+TODO: Currently broken
 
 ## Contributors
 
