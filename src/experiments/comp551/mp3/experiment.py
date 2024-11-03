@@ -25,7 +25,7 @@ from src.models.legacy.bert import (
     PrefinetunedBERT,
 )
 from src.models.legacy.naive_bayes import NaiveBayes, NaiveBayesDataProcessor
-from src.utils.visualization import plot
+from src.visualization import plot
 
 colors = ["r", "b", "g", "c", "m", "y", "k", "w"]
 class_names = ["sadness", "joy", "love", "anger", "fear", "surprise"]
@@ -295,8 +295,9 @@ def experiment_3(
         model = naive_bayes_model()
         model.fit(X_train, y_train)
 
-        train_accuracy, test_accuracy = model.evaluate(X_train, y_train), model.evaluate(
-            X_test, y_test
+        train_accuracy, test_accuracy = (
+            model.evaluate(X_train, y_train),
+            model.evaluate(X_test, y_test),
         )
 
         model.save_complete_model()
@@ -333,8 +334,9 @@ def experiment_3(
         )
         data[0, i, : len(losses), 0] = losses
 
-        train_accuracy, test_accuracy = model.evaluate(train_dataloader), model.evaluate(
-            test_dataloader
+        train_accuracy, test_accuracy = (
+            model.evaluate(train_dataloader),
+            model.evaluate(test_dataloader),
         )
 
         model.save()
