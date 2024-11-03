@@ -13,13 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 class Cache:
-    def __init__(self, cache_dir: str = CACHE_PATH, maxsize: int = 128):
-        self.cache_dir = Path(cache_dir)
+    def __init__(self, cache_dir: Path = CACHE_PATH, maxsize: int = 128):
+        self.cache_dir = cache_dir
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.maxsize = maxsize
 
     def disk_cache(
-        self, func: Callable = None, *, key_prefix: str = "", serializer: str = "auto"
+        self, func: Callable | None = None, *, key_prefix: str = "", serializer: str = "auto"
     ) -> Union[Callable, Callable[[Callable], Callable]]:
         def decorator(f):
             @functools.wraps(f)

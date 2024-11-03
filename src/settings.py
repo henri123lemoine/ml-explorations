@@ -16,6 +16,9 @@ DATA_PATH = PROJECT_PATH / "data"
 DATASETS_PATH = DATA_PATH / "datasets"
 IMAGE_PATH = DATA_PATH / "images"
 CACHE_PATH = DATA_PATH / ".cache"
+MODELS_PATH = DATA_PATH / "models"
+for path in [DATASETS_PATH, IMAGE_PATH, CACHE_PATH, MODELS_PATH]:
+    os.makedirs(path, exist_ok=True)
 
 # Clients
 
