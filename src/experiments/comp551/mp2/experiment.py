@@ -12,13 +12,13 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.models as models
 
+from src.config import load_config
 from src.datasets.retrieval import load_dataset
 from src.models.legacy.CNN import CNN
 from src.models.legacy.MLP import MLP
 from src.models.utils import *
 from src.settings import CACHE_PATH
-from src.utils.config import load_config
-from src.utils.visualization import plot
+from src.visualization import plot
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s - %(levelname)s]: %(message)s")
 logger = logging.getLogger(__name__)

@@ -3,6 +3,7 @@ from typing import Type
 
 import numpy as np
 
+from src.metrics import accuracy
 from src.models.base import Model
 from src.models.utils.activations import Activation, ReLU
 from src.models.utils.initializers import Initializer, Xavier
@@ -10,7 +11,6 @@ from src.models.utils.losses import CrossEntropy, Loss
 from src.models.utils.optimizers import GD, Optimizer
 from src.models.utils.regularizers import None_, Regularizer
 from src.models.utils.schedulers import CosineAnnealing, LRScheduler
-from src.utils.metrics import accuracy
 
 logger = logging.getLogger(__name__)
 

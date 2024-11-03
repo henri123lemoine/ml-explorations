@@ -7,6 +7,7 @@ import pandas as pd
 from matplotlib.transforms import Bbox
 
 from src.datasets.data_processing import normalize, standardize, train_test_split
+from src.metrics import MSE, accuracy, f1_score, precision, recall
 from src.models.legacy.linear_regression import (
     LinearRegressionAnalytic,
     LinearRegressionGD,
@@ -17,8 +18,7 @@ from src.models.legacy.logistic_regression import (
     LogisticRegressionSGD,
 )
 from src.settings import DATASETS_PATH
-from src.utils.metrics import MSE, accuracy, f1_score, precision, recall
-from src.utils.visualization import plot, print_table
+from src.visualization import plot, print_table
 
 # ---------------------------------- controls ----------------------------------
 

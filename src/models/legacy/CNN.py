@@ -5,8 +5,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+from src.metrics import accuracy
 from src.models.base import Model
-from src.utils.metrics import accuracy
 
 logger = logging.getLogger(__name__)
 
