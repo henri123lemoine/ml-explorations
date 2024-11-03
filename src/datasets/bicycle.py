@@ -4,12 +4,11 @@ from typing import Any, Callable
 import numpy as np
 import torch
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import Dataset
 from tqdm.auto import tqdm
 
 from datasets import load_dataset
 from src.config import DatasetConfig
-from src.datasets.augmentation import TrainTransform
 
 
 class BicycleDataset(Dataset):
@@ -204,35 +203,3 @@ class BicycleDataset(Dataset):
         processed = {k: v.squeeze(0) for k, v in processed.items()}
 
         return processed, label
-
-
-def create_dataloaders(
-    processor: Any,
-    config: DatasetConfig | None = None,
-) -> tuple[DataLoader, DataLoader]:
-    """Create train and validation dataloaders with augmentation."""
-    config = config or DatasetConfig()
-
-    # Use class instead of lambda
-    train_transform = TrainTransform() if config.use_augmentation else None
-
-    train_dataset = BicycleDataset(
-        processor, split="train", config=config, transform_fn=train_transform
-    )
-    val_dataset = BicycleDataset(processor, split="val", config=config)
-
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=config.batch_size,
-        shuffle=True,
-        num_workers=config.num_workers,
-    )
-
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=config.batch_size,
-        shuffle=False,
-        num_workers=config.num_workers,
-    )
-
-    return train_loader, val_loader
