@@ -12,11 +12,11 @@ class Model(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def save(self, path: str):
+    def save(self, path: Path):
         torch.save(self.state_dict(), path)
 
     @classmethod
-    def load(cls, path: str):
+    def load(cls, path: Path):
         model = cls()
         model.load_state_dict(torch.load(path))
         return model
