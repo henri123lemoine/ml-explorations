@@ -130,8 +130,8 @@ if __name__ == "__main__":
 
     # The correct transcription text for comparison
     correct_transcription = (
-        "Good morning. This Tuesday is election day. And for months of spirited debate and vigorous campaigning, "
-        "the time has come for Americans to make important decisions about our nation's future and to encourage all "
+        "Good morning. This Tuesday is election day. After months of spirited debate and vigorous campaigning, "
+        "the time has come for Americans to make important decisions about our nation's future and encourage all "
         "Americans to go to the polls and vote. Election season brings out the spirit of competition between our political parties. "
         "And that competition is an essential part of a healthy democracy. But as the campaigns come to a close, Republicans, "
         "Democrats, and independents can find common ground on at least one point. Our system of representative democracy is one "
@@ -140,7 +140,7 @@ if __name__ == "__main__":
         "old or young. Each of them has an equal share in choosing the path that our country will take. And every ballot they cast is a reminder that "
         "our founding principles are alive and well. Voting is one of the great privileges of American citizenship. And it has always required brave defenders. "
         "As you head to the polls next week, remember the sacrifices that have been made by generations of Americans in uniform to preserve our way of life. "
-        "From Bunker Hill to Baghdad, the men and women of America’s armed forces have been devoted guardians of our democracy. All of us owe them and their families "
+        "From Bunker Hill to Baghdad, the men and women of American armed forces have been devoted guardians of our democracy. All of us owe them and their families "
         "a special debt of gratitude on election day. Americans should also remember the important example that our elections set throughout the world. Young democracies "
         "from Georgia and Ukraine to Afghanistan and Iraq can look to the United States for proof that self-government can endure, and nations that still live under "
         "tyranny and oppression can find hope and inspiration in our commitment to liberty. For more than two centuries, Americans have demonstrated the ability of free "
