@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import ClassVar, Generic, Optional, TypeVar
 
+import mlx.core as mx
 import numpy as np
 import torch
 import torch.nn as nn
@@ -135,3 +136,51 @@ class SklearnModel(BaseModel[np.ndarray, np.ndarray, tuple[np.ndarray, np.ndarra
     """Base class for scikit-learn compatible models."""
 
     pass
+
+
+class MLXModel(nn.Module, Generic[InputType, OutputType, DataType], ABC):
+    """Base class for MLX models. MLX is an array framework for machine learning on Apple silicon"""
+
+    registry: ClassVar[dict[str, type["MLXModel"]]] = {}
+
+    def __init__(self) -> None:
+        super().__init__()
+        # MLX automatically handles device placement
+        self.device = "gpu" if str(mx.default_device()) == "gpu" else "cpu"
+
+    def __init_subclass__(cls) -> None:
+        super().__init_subclass__()
+        cls.registry[cls.__name__] = cls
+
+    @abstractmethod
+    def __call__(self, x: InputType) -> OutputType:
+        """Forward pass of the model."""
+        pass
+
+    @abstractmethod
+    def predict(self, x: InputType) -> OutputType:
+        """Make a prediction using the model."""
+        pass
+
+    @abstractmethod
+    def fit(self, train_data: DataType, val_data: Optional[DataType] = None) -> None:
+        """Train the model on the given data."""
+        pass
+
+    @abstractmethod
+    def evaluate(self, data: DataType) -> dict[str, float]:
+        """Evaluate model performance."""
+        pass
+
+    def save(self, path: Path) -> None:
+        """Save model state to the given path."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+        mx.savez(str(path), **self.parameters())
+
+    @classmethod
+    def load(cls, path: Path) -> "MLXModel[InputType, OutputType, DataType]":
+        """Load model state from the given path."""
+        model = cls()
+        weights = mx.load(str(path))
+        model.update(weights)
+        return model
