@@ -10,8 +10,6 @@ from src.models.base import Model
 
 logger = logging.getLogger(__name__)
 
-np.random.seed(0)
-
 
 class CNN(Model):
     def __init__(

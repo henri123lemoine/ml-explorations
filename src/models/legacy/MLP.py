@@ -14,8 +14,6 @@ from src.models.utils.schedulers import CosineAnnealing, LRScheduler
 
 logger = logging.getLogger(__name__)
 
-np.random.seed(0)
-
 
 class MLP(Model):
     def __init__(

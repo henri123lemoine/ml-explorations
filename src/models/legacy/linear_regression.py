@@ -8,8 +8,6 @@ from src.models.utils.optimizers import gradient_descent, stochastic_gradient_de
 
 logger = logging.getLogger(__name__)
 
-np.random.seed(0)
-
 
 class LinearRegression(Model):
     def __init__(self):

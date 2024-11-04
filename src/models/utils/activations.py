@@ -5,8 +5,6 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
-np.random.seed(0)
-
 
 class Activation(ABC):
     @abstractmethod

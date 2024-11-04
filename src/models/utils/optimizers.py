@@ -7,8 +7,6 @@ from src.datasets.data_processing import add_bias_term
 
 logger = logging.getLogger(__name__)
 
-np.random.seed(42)
-
 
 class Optimizer(ABC):
     def __init__(self, lr=0.01, epsilon=1e-7, scheduler=None, **kwargs):
