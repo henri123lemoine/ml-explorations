@@ -12,6 +12,10 @@ from src.settings import CACHE_PATH
 logger = logging.getLogger(__name__)
 
 
+class CacheError(Exception):
+    pass
+
+
 class Cache:
     def __init__(self, cache_dir: Path = CACHE_PATH, maxsize: int = 128):
         self.cache_dir = cache_dir
@@ -76,20 +80,15 @@ class Cache:
 
     def _save_to_disk(self, key: str, value: Any, serializer: str) -> None:
         file_path = self.cache_dir / f"{key}.{serializer}"
-        # logger.debug(f"Saving to cache file: {file_path}")
-        mode = "wb" if serializer == "pickle" else "w"
-        with open(file_path, mode) as f:
-            if serializer == "json":
-                json.dump(value, f, ensure_ascii=False, indent=2)
-            elif serializer == "pickle":
-                pickle.dump(value, f)
-            else:  # "auto"
-                try:
+        try:
+            with open(file_path, "wb" if serializer == "pickle" else "w") as f:
+                if serializer == "json":
                     json.dump(value, f, ensure_ascii=False, indent=2)
-                except TypeError:
-                    f.close()
-                    with open(file_path, "wb") as f:
-                        pickle.dump(value, f)
+                elif serializer == "pickle":
+                    pickle.dump(value, f)
+        except (IOError, pickle.PickleError) as e:
+            logger.error(f"Failed to save to cache: {e}")
+            raise CacheError(f"Failed to save to cache: {e}") from e
 
     def clear_cache(self, key_prefix: str = ""):
         for file in self.cache_dir.glob(f"{key_prefix}*.*"):
