@@ -96,7 +96,7 @@ class WhisperMLX(MLXModel[mx.array, mx.array, DataLoader]):
         self.model_name = model_name
         # The model will be loaded on first use
 
-    def transcribe(self, audio_path: str | Path) -> dict[str, str]:
+    def transcribe(self, audio_path: str | Path) -> str:
         """
         Transcribe audio file to text.
 
@@ -106,7 +106,7 @@ class WhisperMLX(MLXModel[mx.array, mx.array, DataLoader]):
         Returns:
             Dictionary containing transcription results
         """
-        return mlx_whisper.transcribe(str(audio_path), path_or_hf_repo=self.model_name)
+        return mlx_whisper.transcribe(str(audio_path), path_or_hf_repo=self.model_name)["text"]
 
     def __call__(self, x: mx.array) -> mx.array:
         raise NotImplementedError("Direct model call notimplemented")
@@ -122,27 +122,74 @@ class WhisperMLX(MLXModel[mx.array, mx.array, DataLoader]):
 
 
 if __name__ == "__main__":
+    import time
+    from difflib import SequenceMatcher
+
     import numpy as np
     import soundfile as sf
-    import torch
 
+    # The correct transcription text for comparison
+    correct_transcription = (
+        "Good morning. This Tuesday is election day. And for months of spirited debate and vigorous campaigning, "
+        "the time has come for Americans to make important decisions about our nation's future and to encourage all "
+        "Americans to go to the polls and vote. Election season brings out the spirit of competition between our political parties. "
+        "And that competition is an essential part of a healthy democracy. But as the campaigns come to a close, Republicans, "
+        "Democrats, and independents can find common ground on at least one point. Our system of representative democracy is one "
+        "of America's greatest strengths. The United States was founded on the belief that all men are created equal. Every election day, "
+        "millions of Americans of all races, religions, and backgrounds step into voting booths throughout the nation, whether they are rich or poor, "
+        "old or young. Each of them has an equal share in choosing the path that our country will take. And every ballot they cast is a reminder that "
+        "our founding principles are alive and well. Voting is one of the great privileges of American citizenship. And it has always required brave defenders. "
+        "As you head to the polls next week, remember the sacrifices that have been made by generations of Americans in uniform to preserve our way of life. "
+        "From Bunker Hill to Baghdad, the men and women of America’s armed forces have been devoted guardians of our democracy. All of us owe them and their families "
+        "a special debt of gratitude on election day. Americans should also remember the important example that our elections set throughout the world. Young democracies "
+        "from Georgia and Ukraine to Afghanistan and Iraq can look to the United States for proof that self-government can endure, and nations that still live under "
+        "tyranny and oppression can find hope and inspiration in our commitment to liberty. For more than two centuries, Americans have demonstrated the ability of free "
+        "people to choose their own leaders. Our nation has flourished because of its commitment to trusting the wisdom of our citizenry. In this year's election, we will "
+        "see this tradition continue. And we will be reminded once again that we are blessed to live in a free nation guided by the will of the people. Thank you for listening."
+    )
+
+    # Load the audio file
     audio_path = "/Users/henrilemoine/Downloads/samples_gb0.wav"
-
-    # method 1
-    model = Whisper()
     audio_data, sr = sf.read(audio_path)
 
+    # Ensure mono and float32 format
     if len(audio_data.shape) > 1:
         audio_data = audio_data.mean(axis=1)
-
     if audio_data.dtype != np.float32:
         audio_data = audio_data.astype(np.float32)
-    text_1 = model.transcribe(audio_data)
 
-    # method 2
-    model = WhisperMLX()
-    text_2 = model.transcribe(audio_path)["text"]
+    # Method 1: Using Whisper
+    model_whisper = Whisper()
+    start_time = time.time()
+    text_1 = model_whisper.transcribe(audio_data)
+    time_whisper = time.time() - start_time
 
-    # output
-    print(f"Transcription: {text_1}\n")
-    print(f"Transcription: {text_2}")
+    # Method 2: Using WhisperMLX
+    model_whisper_mlx = WhisperMLX()
+    start_time = time.time()
+    text_2 = model_whisper_mlx.transcribe(audio_path)
+    time_whisper_mlx = time.time() - start_time
+
+    # Define a function to compute similarity for accuracy measurement
+    def compute_similarity(transcription, reference):
+        return SequenceMatcher(None, transcription, reference).ratio()
+
+    # Calculate similarities
+    similarity_1 = compute_similarity(text_1, correct_transcription)
+    similarity_2 = compute_similarity(text_2, correct_transcription)
+
+    # Print results
+    print("\n--- Transcription Results ---\n")
+    print("Method 1: Whisper")
+    print(f"Transcription:\n{text_1}")
+    print(f"Time taken: {time_whisper:.2f} seconds")
+    print(f"Similarity to correct transcription: {similarity_1:.2%}\n")
+
+    print("Method 2: WhisperMLX")
+    print(f"Transcription:\n{text_2}")
+    print(f"Time taken: {time_whisper_mlx:.2f} seconds")
+    print(f"Similarity to correct transcription: {similarity_2:.2%}\n")
+
+    print("--- Correct Transcription for Reference ---\n")
+    print(correct_transcription)
+    print(correct_transcription)
