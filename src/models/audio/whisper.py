@@ -1,14 +1,14 @@
 from pathlib import Path
 
-import mlx_whisper.audio as audio
-import numpy as np
+import mlx.core as mx
+import mlx_whisper
 import torch
 from torch import Tensor
 from torch.utils.data import DataLoader
 from transformers import WhisperForConditionalGeneration, WhisperProcessor
 from transformers import logging as transformers_logging
 
-from src.models.base import TorchModel
+from src.models.base import MLXModel, TorchModel
 
 transformers_logging.set_verbosity_error()
 
@@ -83,24 +83,66 @@ class Whisper(TorchModel):
         raise NotImplementedError("Evaluation not implemented for Whisper model")
 
 
+class WhisperMLX(MLXModel[mx.array, mx.array, DataLoader]):
+    """MLX-optimized Whisper model for Apple Silicon.
+
+    Models:
+    - mlx-community/whisper-tiny-mlx-4bit
+    - mlx-community/whisper-large-v3-mlx-4bit
+    """
+
+    def __init__(self, model_name: str = "mlx-community/whisper-tiny-mlx-4bit") -> None:
+        super().__init__()
+        self.model_name = model_name
+        # The model will be loaded on first use
+
+    def transcribe(self, audio_path: str | Path) -> dict[str, str]:
+        """
+        Transcribe audio file to text.
+
+        Args:
+            audio_path: Path to audio file
+
+        Returns:
+            Dictionary containing transcription results
+        """
+        return mlx_whisper.transcribe(str(audio_path), path_or_hf_repo=self.model_name)
+
+    def __call__(self, x: mx.array) -> mx.array:
+        raise NotImplementedError("Direct model call notimplemented")
+
+    def predict(self, x: mx.array) -> mx.array:
+        raise NotImplementedError("Direct prediction not implemented")
+
+    def fit(self, train_data: DataLoader, val_data: DataLoader | None = None) -> None:
+        raise NotImplementedError("Training not implemented")
+
+    def evaluate(self, data: DataLoader) -> dict[str, float]:
+        raise NotImplementedError("Evaluation not implemented")
+
+
 if __name__ == "__main__":
     import numpy as np
     import soundfile as sf
     import torch
-    from torchaudio.transforms import Resample
 
+    audio_path = "/Users/henrilemoine/Downloads/samples_gb0.wav"
+
+    # method 1
     model = Whisper()
+    audio_data, sr = sf.read(audio_path)
 
-    audio, sr = sf.read("/Users/henrilemoine/Downloads/samples_gb0.wav")
-    if len(audio.shape) > 1:
-        audio = audio.mean(axis=1)
-    # Convert to tensor for resampling
-    audio = torch.from_numpy(audio.astype(np.float32))
-    # Resample if needed
-    if sr != 16000:
-        resampler = Resample(orig_freq=sr, new_freq=16000)
-        audio = resampler(audio)
+    if len(audio_data.shape) > 1:
+        audio_data = audio_data.mean(axis=1)
 
-    text = model.transcribe(audio)
-    print(f"Transcription: {text}")
-    print(f"Transcription: {text}")
+    if audio_data.dtype != np.float32:
+        audio_data = audio_data.astype(np.float32)
+    text_1 = model.transcribe(audio_data)
+
+    # method 2
+    model = WhisperMLX()
+    text_2 = model.transcribe(audio_path)["text"]
+
+    # output
+    print(f"Transcription: {text_1}\n")
+    print(f"Transcription: {text_2}")
