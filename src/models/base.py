@@ -55,6 +55,10 @@ class ModelInterface[IN: Any, OUT: Any, DATA: Any](ABC):
         """Load model state from the given path."""
         pass
 
+    def is_trainable(self) -> bool:
+        """Whether this model can be trained."""
+        return True
+
 
 class TorchBaseModel[IN: Tensor | dict[str, Tensor], OUT: Tensor | float, DATA](
     ModelInterface[IN, OUT, DATA], nn.Module
