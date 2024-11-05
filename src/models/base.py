@@ -2,7 +2,7 @@ import logging
 import pickle
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import ClassVar, Generic, Optional, TypeVar
+from typing import ClassVar
 
 import mlx.core as mx
 import numpy as np
@@ -15,19 +15,19 @@ from src.settings import CACHE_PATH
 
 logger = logging.getLogger(__name__)
 
-InputType = TypeVar("InputType", Tensor, np.ndarray, dict[str, Tensor])
-OutputType = TypeVar("OutputType", Tensor, np.ndarray, float)
-DataType = TypeVar("DataType")
 
-
-class BaseModel(nn.Module, Generic[InputType, OutputType, DataType], ABC):
+class BaseModel[
+    IN: Tensor | np.ndarray | dict[str, Tensor],
+    OUT: Tensor | np.ndarray | float,
+    DATA,
+](nn.Module, ABC):
     """
     Base class for all models with generic type support.
 
     Type Parameters:
-        InputType: The type of input the model accepts (Tensor, np.ndarray, or dict of tensors)
-        OutputType: The type of output the model produces
-        DataType: The type of data used for training (e.g., DataLoader, numpy array, etc.)
+        IN: The type of input the model accepts (Tensor, np.ndarray, or dict of tensors)
+        OUT: The type of output the model produces
+        DATA: The type of data used for training (e.g., DataLoader, numpy array, etc.)
     """
 
     # Class variable to track model registry
@@ -43,22 +43,22 @@ class BaseModel(nn.Module, Generic[InputType, OutputType, DataType], ABC):
         cls.registry[cls.__name__] = cls
 
     @abstractmethod
-    def forward(self, x: InputType) -> OutputType:
+    def forward(self, x: IN) -> OUT:
         """Forward pass of the model."""
         pass
 
     @abstractmethod
-    def predict(self, x: InputType) -> OutputType:
+    def predict(self, x: IN) -> OUT:
         """Make a prediction for the given input."""
         pass
 
     @abstractmethod
-    def fit(self, train_data: DataType, val_data: DataType | None = None) -> None:
+    def fit(self, train_data: DATA, val_data: DATA | None = None) -> None:
         """Train the model on the given data."""
         pass
 
     @abstractmethod
-    def evaluate(self, data: DataType) -> dict[str, float]:
+    def evaluate(self, data: DATA) -> dict[str, float]:
         """Evaluate model performance."""
         pass
 
@@ -67,7 +67,7 @@ class BaseModel(nn.Module, Generic[InputType, OutputType, DataType], ABC):
         raise NotImplementedError
 
     @classmethod
-    def load(cls, path: Path) -> "BaseModel[InputType, OutputType, DataType]":
+    def load(cls, path: Path) -> "BaseModel[IN, OUT, DATA]":
         """Load model state from the given path."""
         raise NotImplementedError
 
@@ -116,7 +116,7 @@ class TorchModel(BaseModel[Tensor, Tensor, DataLoader]):
         with torch.no_grad():
             return self.forward(x)
 
-    def fit(self, train_data: DataLoader, val_data: Optional[DataLoader] = None) -> None:
+    def fit(self, train_data: DataLoader, val_data: DataLoader | None = None) -> None:
         raise NotImplementedError("Subclasses must implement fit method")
 
     def evaluate(self, data: DataLoader) -> dict[str, float]:
@@ -138,7 +138,7 @@ class SklearnModel(BaseModel[np.ndarray, np.ndarray, tuple[np.ndarray, np.ndarra
     pass
 
 
-class MLXModel(nn.Module, Generic[InputType, OutputType, DataType], ABC):
+class MLXModel[IN, OUT, DATA](nn.Module, ABC):
     """Base class for MLX models. MLX is an array framework for machine learning on Apple silicon"""
 
     registry: ClassVar[dict[str, type["MLXModel"]]] = {}
@@ -153,22 +153,22 @@ class MLXModel(nn.Module, Generic[InputType, OutputType, DataType], ABC):
         cls.registry[cls.__name__] = cls
 
     @abstractmethod
-    def __call__(self, x: InputType) -> OutputType:
+    def __call__(self, x: IN) -> OUT:
         """Forward pass of the model."""
         pass
 
     @abstractmethod
-    def predict(self, x: InputType) -> OutputType:
+    def predict(self, x: IN) -> OUT:
         """Make a prediction using the model."""
         pass
 
     @abstractmethod
-    def fit(self, train_data: DataType, val_data: Optional[DataType] = None) -> None:
+    def fit(self, train_data: DATA, val_data: DATA | None = None) -> None:
         """Train the model on the given data."""
         pass
 
     @abstractmethod
-    def evaluate(self, data: DataType) -> dict[str, float]:
+    def evaluate(self, data: DATA) -> dict[str, float]:
         """Evaluate model performance."""
         pass
 
@@ -178,7 +178,7 @@ class MLXModel(nn.Module, Generic[InputType, OutputType, DataType], ABC):
         mx.savez(str(path), **self.parameters())
 
     @classmethod
-    def load(cls, path: Path) -> "MLXModel[InputType, OutputType, DataType]":
+    def load(cls, path: Path) -> "MLXModel[IN, OUT, DATA]":
         """Load model state from the given path."""
         model = cls()
         weights = mx.load(str(path))
