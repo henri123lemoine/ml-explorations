@@ -2,7 +2,7 @@ import logging
 import pickle
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import ClassVar
+from typing import Any, ClassVar
 
 import mlx.core as mx
 import numpy as np
@@ -16,36 +16,23 @@ from src.settings import CACHE_PATH
 logger = logging.getLogger(__name__)
 
 
-class BaseModel[
-    IN: Tensor | np.ndarray | dict[str, Tensor],
-    OUT: Tensor | np.ndarray | float,
-    DATA,
-](nn.Module, ABC):
+class ModelInterface[IN: Any, OUT: Any, DATA: Any](ABC):
     """
-    Base class for all models with generic type support.
+    Framework-agnostic interface for all models with generic type support.
 
     Type Parameters:
-        IN: The type of input the model accepts (Tensor, np.ndarray, or dict of tensors)
+        IN: The type of input the model accepts
         OUT: The type of output the model produces
-        DATA: The type of data used for training (e.g., DataLoader, numpy array, etc.)
+        DATA: The type of data used for training
     """
 
     # Class variable to track model registry
-    registry: ClassVar[dict[str, type["BaseModel"]]] = {}
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    registry: ClassVar[dict[str, type["ModelInterface"]]] = {}
 
     def __init_subclass__(cls) -> None:
         """Register all model subclasses automatically"""
         super().__init_subclass__()
         cls.registry[cls.__name__] = cls
-
-    @abstractmethod
-    def forward(self, x: IN) -> OUT:
-        """Forward pass of the model."""
-        pass
 
     @abstractmethod
     def predict(self, x: IN) -> OUT:
@@ -62,28 +49,45 @@ class BaseModel[
         """Evaluate model performance."""
         pass
 
+    @abstractmethod
     def save(self, path: Path) -> None:
         """Save model state to the given path."""
-        raise NotImplementedError
+        pass
 
     @classmethod
-    def load(cls, path: Path) -> "BaseModel[IN, OUT, DATA]":
+    @abstractmethod
+    def load(cls, path: Path) -> "ModelInterface[IN, OUT, DATA]":
         """Load model state from the given path."""
-        raise NotImplementedError
+        pass
 
 
-class TorchModel(BaseModel[Tensor, Tensor, DataLoader]):
-    """Standard PyTorch model implementation with common functionality."""
+class TorchBaseModel[IN: Tensor | dict[str, Tensor], OUT: Tensor | float, DATA](
+    ModelInterface[IN, OUT, DATA], nn.Module
+):
+    """
+    Base class for PyTorch models.
+    """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    @abstractmethod
+    def forward(self, x: IN) -> OUT:
+        """Forward pass of the model."""
+        pass
+
+    def predict(self, x: IN) -> OUT:
+        self.eval()
+        with torch.no_grad():
+            return self.forward(x)
 
     def save(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         torch.save(self.state_dict(), path)
 
     @classmethod
-    def load(cls, path: Path) -> "TorchModel":
+    def load(cls, path: Path) -> "TorchBaseModel[IN, OUT, DATA]":
         model = cls()
         model.load_state_dict(torch.load(path))
         model.to(model.device)
@@ -102,7 +106,7 @@ class TorchModel(BaseModel[Tensor, Tensor, DataLoader]):
     @classmethod
     def load_complete_model(
         cls, file_name: str | None = None, dir_path: Path = CACHE_PATH, ext: str = "pth"
-    ) -> "TorchModel":
+    ) -> "TorchBaseModel[IN, OUT, DATA]":
         if file_name is None:
             file_name = cls.__name__
         file_path = dir_path / f"{file_name}_cls.{ext}"
@@ -111,66 +115,41 @@ class TorchModel(BaseModel[Tensor, Tensor, DataLoader]):
             model.to(model.device)
             return model
 
-    def predict(self, x: Tensor) -> Tensor:
-        self.eval()
-        with torch.no_grad():
-            return self.forward(x)
 
-    def fit(self, train_data: DataLoader, val_data: DataLoader | None = None) -> None:
-        raise NotImplementedError("Subclasses must implement fit method")
+class TorchModel(TorchBaseModel[Tensor, Tensor, DataLoader]):
+    """Standard PyTorch model implementation with common functionality."""
 
-    def evaluate(self, data: DataLoader) -> dict[str, float]:
-        raise NotImplementedError("Subclasses must implement evaluate method")
-
-    def forward(self, x: Tensor) -> Tensor:
-        raise NotImplementedError("Subclasses must implement forward method")
+    pass
 
 
-class NumpyModel(BaseModel[np.ndarray, np.ndarray, tuple[np.ndarray, np.ndarray]]):
+class NumpyModel(ModelInterface[np.ndarray, np.ndarray, tuple[np.ndarray, np.ndarray]]):
     """Base class for numpy-based models."""
 
     pass
 
 
-class SklearnModel(BaseModel[np.ndarray, np.ndarray, tuple[np.ndarray, np.ndarray]]):
+class SklearnModel(ModelInterface[np.ndarray, np.ndarray, tuple[np.ndarray, np.ndarray]]):
     """Base class for scikit-learn compatible models."""
 
     pass
 
 
-class MLXModel[IN, OUT, DATA](nn.Module, ABC):
+class MLXBaseModel[IN, OUT, DATA](ModelInterface[IN, OUT, DATA], nn.Module):
     """Base class for MLX models. MLX is an array framework for machine learning on Apple silicon"""
-
-    registry: ClassVar[dict[str, type["MLXModel"]]] = {}
 
     def __init__(self) -> None:
         super().__init__()
         # MLX automatically handles device placement
         self.device = "gpu" if str(mx.default_device()) == "gpu" else "cpu"
 
-    def __init_subclass__(cls) -> None:
-        super().__init_subclass__()
-        cls.registry[cls.__name__] = cls
-
     @abstractmethod
     def __call__(self, x: IN) -> OUT:
         """Forward pass of the model."""
         pass
 
-    @abstractmethod
     def predict(self, x: IN) -> OUT:
         """Make a prediction using the model."""
-        pass
-
-    @abstractmethod
-    def fit(self, train_data: DATA, val_data: DATA | None = None) -> None:
-        """Train the model on the given data."""
-        pass
-
-    @abstractmethod
-    def evaluate(self, data: DATA) -> dict[str, float]:
-        """Evaluate model performance."""
-        pass
+        return self(x)
 
     def save(self, path: Path) -> None:
         """Save model state to the given path."""
@@ -178,9 +157,15 @@ class MLXModel[IN, OUT, DATA](nn.Module, ABC):
         mx.savez(str(path), **self.parameters())
 
     @classmethod
-    def load(cls, path: Path) -> "MLXModel[IN, OUT, DATA]":
+    def load(cls, path: Path) -> "MLXBaseModel[IN, OUT, DATA]":
         """Load model state from the given path."""
         model = cls()
         weights = mx.load(str(path))
         model.update(weights)
         return model
+
+
+class MLXModel[IN, OUT, DATA](MLXBaseModel[IN, OUT, DATA]):
+    """Concrete MLX model implementation."""
+
+    pass

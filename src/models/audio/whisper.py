@@ -72,7 +72,7 @@ class Whisper(TorchModel):
             path,
             torch_dtype=model.torch_dtype,
             device_map=model.device,
-        ).to(model.device)
+        )
         model.processor = WhisperProcessor.from_pretrained(path)
         return model
 
@@ -94,9 +94,8 @@ class WhisperMLX(MLXModel[mx.array, mx.array, DataLoader]):
     def __init__(self, model_name: str = "mlx-community/whisper-tiny-mlx-4bit") -> None:
         super().__init__()
         self.model_name = model_name
-        # The model will be loaded on first use
 
-    def transcribe(self, audio_path: str | Path) -> str:
+    def transcribe(self, audio_path: Path) -> str:
         """
         Transcribe audio file to text.
 
@@ -109,7 +108,7 @@ class WhisperMLX(MLXModel[mx.array, mx.array, DataLoader]):
         return mlx_whisper.transcribe(str(audio_path), path_or_hf_repo=self.model_name)["text"]
 
     def __call__(self, x: mx.array) -> mx.array:
-        raise NotImplementedError("Direct model call notimplemented")
+        raise NotImplementedError("Direct model call not implemented")
 
     def predict(self, x: mx.array) -> mx.array:
         raise NotImplementedError("Direct prediction not implemented")
