@@ -36,7 +36,9 @@ class QwenModel(TorchModel):
         self.device = torch.device(
             "mps"
             if torch.backends.mps.is_available()
-            else "cuda" if torch.cuda.is_available() else "cpu"
+            else "cuda"
+            if torch.cuda.is_available()
+            else "cpu"
         )
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name, torch_dtype=torch.float16, device_map=self.device
@@ -90,7 +92,7 @@ class QwenModel(TorchModel):
 
 
 if __name__ == "__main__":
-    model = QwenModel("Qwen/Qwen2-7B-Instruct")
+    model = QwenModel("Qwen/Qwen2-0.5B-Instruct")
     prompt = "Tell me a short joke"
     messages = [
         {
