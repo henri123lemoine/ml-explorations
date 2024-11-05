@@ -1,105 +1,196 @@
 import logging
 from typing import Type
 
-import numpy as np
+import torch
+import torch.nn as nn
+from torch import Tensor
+from torch.utils.data import DataLoader
 
 from src.metrics import accuracy
-from src.models.base import Model
-from src.models.utils.activations import Activation, ReLU
+from src.models.base import TorchModel
+from src.models.utils.activations import ReLU
 from src.models.utils.initializers import Initializer, Xavier
-from src.models.utils.losses import CrossEntropy, Loss
-from src.models.utils.optimizers import GD, Optimizer
-from src.models.utils.regularizers import None_, Regularizer
-from src.models.utils.schedulers import CosineAnnealing, LRScheduler
+from src.models.utils.optimizers import Adam
+from src.models.utils.schedulers import CosineAnnealing
 
 logger = logging.getLogger(__name__)
 
 
-class MLP(Model):
+class MLPLayer(nn.Module):
+    """A single MLP layer with configurable initialization"""
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        initializer: Type[Initializer] = Xavier,
+        activation: nn.Module | None = None,
+    ):
+        super().__init__()
+        self.linear = nn.Linear(in_features, out_features)
+        self.activation = activation
+
+        # Initialize weights using the specified initializer
+        initializer_instance = initializer()
+        weight_init = torch.tensor(
+            initializer_instance.initialize(in_features, out_features)
+        ).float()
+        self.linear.weight.data = weight_init
+        nn.init.zeros_(self.linear.bias)
+
+    def forward(self, x: Tensor) -> Tensor:
+        x = self.linear(x)
+        return self.activation(x) if self.activation is not None else x
+
+
+class MLP(TorchModel):
+    """PyTorch implementation of a Multi-Layer Perceptron"""
+
     def __init__(
         self,
         input_dim: int,
         hidden_layers: list[int],
         num_classes: int = 10,
-        activation_function: Type[Activation] = ReLU,
-        optimizer: Type[Optimizer] = GD,
-        scheduler: Type[LRScheduler] = CosineAnnealing,
-        regularizer: Type[Regularizer] = None_,
-        loss_function: Type[Loss] = CrossEntropy,
+        activation_function: Type[nn.Module] = ReLU,
+        optimizer: Type[torch.optim.Optimizer] = Adam,
+        scheduler: Type[torch.optim.lr_scheduler._LRScheduler] = CosineAnnealing,
         initializer: Type[Initializer] = Xavier,
+        lr: float = 0.001,
         **kwargs,
     ):
-        self.activation_function = activation_function()
-        self.optimizer = optimizer(scheduler=scheduler(**kwargs), **kwargs)
-        self.initializer = initializer()
-        self.regularizer = regularizer()
-        self.loss_function = loss_function()
+        super().__init__()
 
-        self.layers = [input_dim] + hidden_layers + [num_classes]
-        self.initialize_weights()
+        # Build layer dimensions
+        layer_sizes = [input_dim] + hidden_layers + [num_classes]
 
-    def initialize_weights(self):
-        self.weights = [
-            self.initializer.initialize(self.layers[i], self.layers[i + 1])
-            for i in range(len(self.layers) - 1)
-        ]
-        self.biases = [np.zeros((1, self.layers[i + 1])) for i in range(len(self.layers) - 1)]
-        self.vw = [np.zeros_like(w) for w in self.weights]
-        self.sw = [np.zeros_like(w) for w in self.weights]
+        # Create activation function instance
+        activation = activation_function()
+        if isinstance(activation, nn.Module):
+            self.activation = activation
+        else:
+            # Convert custom activation to PyTorch module
+            self.activation = type(
+                "CustomActivation",
+                (nn.Module,),
+                {
+                    "forward": lambda self, x: activation.function(x),
+                    "backward": lambda self, x: activation.derivative(x),
+                },
+            )()
 
-    def forward(self, x, train_mode=True):
-        self.a = [x]
-        for w, b in zip(self.weights, self.biases):
-            z = np.dot(self.a[-1], w) + b
-            self.a.append(self.activation_function.function(z))
-        return self.a[-1]
+        # Build network layers
+        layers = []
+        for i in range(len(layer_sizes) - 1):
+            is_last_layer = i == len(layer_sizes) - 2
+            layers.append(
+                MLPLayer(
+                    layer_sizes[i],
+                    layer_sizes[i + 1],
+                    initializer=initializer,
+                    activation=None if is_last_layer else self.activation,
+                )
+            )
 
-    def backward(self, x, y, loss_func):
-        m = x.shape[0]
-        loss_derivative = loss_func.derivative(self.a[-1], y)
-        dz = loss_derivative
-        for i in reversed(range(len(self.a) - 1)):
-            dw = np.dot(self.a[i].T, dz) / m
-            updates = self.optimizer.update(self.weights[i], dw, self.vw[i], self.sw[i])
-            self.weights[i] = updates[0]
-            if len(updates) > 1:
-                self.vw[i] = updates[1]
-            if len(updates) > 2:
-                self.sw[i] = updates[2]
-            dz = np.dot(dz, self.weights[i].T) * self.activation_function.derivative(self.a[i])
+        self.layers = nn.ModuleList(layers)
+        self.criterion = nn.CrossEntropyLoss()
 
-    def train(self, trainloader, testloader, epochs=100, print_loss=False, log_interval=10):
+        # Setup optimizer and scheduler
+        self.optimizer = optimizer(self.parameters(), lr=lr, **kwargs)
+        self.scheduler = scheduler(self.optimizer, **kwargs) if scheduler else None
+
+        # Move model to correct device
+        self.to(self.device)
+
+    def forward(self, x: Tensor) -> Tensor:
+        """Forward pass through the network"""
+        for layer in self.layers:
+            x = layer(x)
+        return x
+
+    def predict(self, x: Tensor) -> Tensor:
+        """Make predictions for the input"""
+        self.eval()
+        with torch.no_grad():
+            return self.forward(x).argmax(dim=1)
+
+    def training_step(self, batch: tuple[Tensor, Tensor]) -> tuple[Tensor, float]:
+        """Single training step"""
+        x, y = batch
+        x, y = x.to(self.device), y.to(self.device)
+
+        self.optimizer.zero_grad()
+        output = self.forward(x)
+        loss = self.criterion(output, y)
+        loss.backward()
+        self.optimizer.step()
+
+        acc = accuracy(output.argmax(dim=1).cpu().numpy(), y.cpu().numpy())
+        return loss, acc
+
+    def validation_step(self, batch: tuple[Tensor, Tensor]) -> tuple[Tensor, float]:
+        """Single validation step"""
+        x, y = batch
+        x, y = x.to(self.device), y.to(self.device)
+
+        with torch.no_grad():
+            output = self.forward(x)
+            loss = self.criterion(output, y)
+            acc = accuracy(output.argmax(dim=1).cpu().numpy(), y.cpu().numpy())
+
+        return loss, acc
+
+    def fit(
+        self,
+        train_data: DataLoader,
+        val_data: DataLoader | None = None,
+        epochs: int = 100,
+        print_loss: bool = False,
+        log_interval: int = 10,
+    ) -> tuple[list[float], list[float]]:
+        """Train the model"""
         train_accuracies = []
-        test_accuracies = []
+        val_accuracies = []
 
         for epoch in range(epochs):
-            test_iterator = iter(testloader)
+            self.train()
+            epoch_train_acc = []
 
-            for batch_idx, (X_batch_train, y_batch_train) in enumerate(trainloader):
-                y_batch_one_hot = np.eye(self.layers[-1])[y_batch_train]
-                yh = self.forward(X_batch_train)
-                self.backward(X_batch_train, y_batch_one_hot, self.loss_function)
-                train_accuracy = accuracy(np.argmax(yh, axis=1), y_batch_train)
-                train_accuracies.append(train_accuracy)
+            for batch_idx, batch in enumerate(train_data):
+                _, train_acc = self.training_step(batch)
+                epoch_train_acc.append(train_acc)
 
-                try:
-                    X_batch_test, y_batch_test = next(test_iterator)
-                except StopIteration:
-                    test_iterator = iter(testloader)
-                    X_batch_test, y_batch_test = next(test_iterator)
+                if val_data is not None:
+                    val_batch = next(iter(val_data))
+                    _, val_acc = self.validation_step(val_batch)
+                    val_accuracies.append(val_acc)
 
-                yh_test = self.forward(X_batch_test, train_mode=False)
+                train_accuracies.append(train_acc)
 
-                test_accuracy = accuracy(np.argmax(yh_test, axis=1), y_batch_test)
-                test_accuracies.append(test_accuracy)
+                if batch_idx % log_interval == 0 and print_loss:
+                    logger.info(
+                        f"Epoch {epoch}, Batch {batch_idx}, "
+                        f"Training Accuracy: {train_acc:.4f}, "
+                        f"Validation Accuracy: {val_acc:.4f}"
+                    )
 
-                if batch_idx % log_interval == 0 or batch_idx == len(trainloader) - 1:
-                    if print_loss:
-                        message = (
-                            f"Epoch {epoch}, Batch {batch_idx}, "
-                            f"Training Accuracy: {train_accuracy:.4f}, "
-                            f"Test Accuracy: {test_accuracy:.4f}"
-                        )
-                        logger.info(message)
+            # Update learning rate
+            if self.scheduler is not None:
+                self.scheduler.step()
 
-        return train_accuracies, test_accuracies
+        return train_accuracies, val_accuracies
+
+    def evaluate(self, data: DataLoader) -> dict[str, float]:
+        """Evaluate the model"""
+        self.eval()
+        total_loss = 0
+        total_acc = 0
+        n_batches = 0
+
+        with torch.no_grad():
+            for batch in data:
+                loss, acc = self.validation_step(batch)
+                total_loss += loss.item()
+                total_acc += acc
+                n_batches += 1
+
+        return {"loss": total_loss / n_batches, "accuracy": total_acc / n_batches}
