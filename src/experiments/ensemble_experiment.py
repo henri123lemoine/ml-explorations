@@ -1,8 +1,11 @@
 from pathlib import Path
 
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from matplotlib.gridspec import GridSpec
 from torch import Tensor
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
@@ -208,7 +211,7 @@ def experiment():
     print("Training individual models:")
     for i, model in enumerate(models, 1):
         print(f"\nTraining Model {i}:")
-        history = train_model(model, train_loader, test_loader, epochs=1)
+        history = train_model(model, train_loader, test_loader)
         histories.append(history)
 
     # 1. Simple Mean Ensemble
@@ -253,6 +256,133 @@ def experiment():
         print(f"\nTemperature {temp}:")
         print(f"Accuracy: {acc:.2f}%")
         print("Weights:", [f"{w:.3f}" for w in weighted_ensemble.weights])
+
+    plot_ensemble_analysis(histories, models, train_loader, test_loader, val_loader)
+
+
+def plot_ensemble_analysis(histories, models, train_loader, test_loader, val_loader):
+    """Comprehensive visualization of ensemble performance."""
+
+    # Set up the figure with a grid layout
+    plt.style.use("seaborn")
+    fig = plt.figure(figsize=(20, 15))
+    gs = GridSpec(2, 2, figure=fig)
+
+    # 1. Model Training Trajectories
+    ax1 = fig.add_subplot(gs[0, 0])
+    colors = plt.cm.tab10(np.linspace(0, 1, len(models)))
+
+    for i, (history, color) in enumerate(zip(histories, colors)):
+        model_type = "Random" if isinstance(models[i], RandomModel) else type(models[i]).__name__
+        ax1.plot(history["test_acc"], label=model_type, color=color, linewidth=2)
+
+    ax1.set_xlabel("Epoch")
+    ax1.set_ylabel("Test Accuracy (%)")
+    ax1.set_title("Model Training Trajectories")
+    ax1.legend()
+    ax1.grid(True, alpha=0.3)
+
+    # 2. Ensemble Method Comparison Over Training
+    ax2 = fig.add_subplot(gs[0, 1])
+    epochs = len(histories[0]["test_acc"])
+    ensemble_histories = {
+        "Mean": [],
+        "Vote": [],
+        "Weighted (T=0.1)": [],
+        "Weighted (T=1.0)": [],
+        "Weighted (T=5.0)": [],
+        "Stacking": [],
+    }
+
+    # For each epoch, evaluate all ensemble methods
+    for epoch in range(epochs):
+        # Update models to this epoch's state
+        epoch_models = [models[i] for i in range(len(models))]
+
+        # Create and evaluate different ensembles
+        mean_ensemble = Ensemble(models=epoch_models, method=EnsembleMethod.MEAN)
+        vote_ensemble = Ensemble(models=epoch_models, method=EnsembleMethod.VOTE)
+
+        # Different temperature weighted ensembles
+        weighted_t01 = Ensemble(models=epoch_models, method=EnsembleMethod.WEIGHTED)
+        weighted_t01.calibrate_weights(val_loader, method="softmax", temperature=0.1)
+
+        weighted_t1 = Ensemble(models=epoch_models, method=EnsembleMethod.WEIGHTED)
+        weighted_t1.calibrate_weights(val_loader, method="softmax", temperature=1.0)
+
+        weighted_t5 = Ensemble(models=epoch_models, method=EnsembleMethod.WEIGHTED)
+        weighted_t5.calibrate_weights(val_loader, method="softmax", temperature=5.0)
+
+        stacking_ensemble = Ensemble(models=epoch_models, method=EnsembleMethod.STACKING)
+        stacking_ensemble.fit_stacking(train_loader, val_loader)
+
+        # Evaluate all methods
+        ensemble_histories["Mean"].append(
+            evaluate_ensemble(mean_ensemble, test_loader)["accuracy"] * 100
+        )
+        ensemble_histories["Vote"].append(
+            evaluate_ensemble(vote_ensemble, test_loader)["accuracy"] * 100
+        )
+        ensemble_histories["Weighted (T=0.1)"].append(
+            evaluate_ensemble(weighted_t01, test_loader)["accuracy"] * 100
+        )
+        ensemble_histories["Weighted (T=1.0)"].append(
+            evaluate_ensemble(weighted_t1, test_loader)["accuracy"] * 100
+        )
+        ensemble_histories["Weighted (T=5.0)"].append(
+            evaluate_ensemble(weighted_t5, test_loader)["accuracy"] * 100
+        )
+        ensemble_histories["Stacking"].append(
+            evaluate_ensemble(stacking_ensemble, test_loader)["accuracy"] * 100
+        )
+
+    for method, history in ensemble_histories.items():
+        ax2.plot(history, label=method, linewidth=2)
+
+    ax2.set_xlabel("Epoch")
+    ax2.set_ylabel("Test Accuracy (%)")
+    ax2.set_title("Ensemble Method Comparison")
+    ax2.legend()
+    ax2.grid(True, alpha=0.3)
+
+    # 3. Temperature Impact on Weighted Ensemble
+    ax3 = fig.add_subplot(gs[1, 0])
+    temperatures = [0.1, 0.5, 1.0, 2.0, 5.0, 10.0]
+    final_accuracies = []
+    weight_distributions = []
+
+    for temp in temperatures:
+        weighted_ensemble = Ensemble(models=models, method=EnsembleMethod.WEIGHTED)
+        weighted_ensemble.calibrate_weights(val_loader, method="softmax", temperature=temp)
+        acc = evaluate_ensemble(weighted_ensemble, test_loader)["accuracy"] * 100
+        final_accuracies.append(acc)
+        weight_distributions.append(weighted_ensemble.weights)
+
+    # Plot accuracy vs temperature
+    ax3.plot(temperatures, final_accuracies, "bo-", linewidth=2)
+    ax3.set_xscale("log")
+    ax3.set_xlabel("Temperature")
+    ax3.set_ylabel("Final Test Accuracy (%)")
+    ax3.set_title("Impact of Temperature on Weighted Ensemble")
+    ax3.grid(True, alpha=0.3)
+
+    # 4. Weight Distribution Analysis
+    ax4 = fig.add_subplot(gs[1, 1])
+    weight_distributions = np.array(weight_distributions)
+
+    for i in range(len(models)):
+        model_type = "Random" if isinstance(models[i], RandomModel) else type(models[i]).__name__
+        ax4.plot(temperatures, weight_distributions[:, i], "o-", label=f"{model_type}", linewidth=2)
+
+    ax4.set_xscale("log")
+    ax4.set_xlabel("Temperature")
+    ax4.set_ylabel("Model Weight")
+    ax4.set_title("Weight Distribution vs Temperature")
+    ax4.legend()
+    ax4.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == "__main__":
