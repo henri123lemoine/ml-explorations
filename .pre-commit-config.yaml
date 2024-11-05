@@ -23,10 +23,5 @@ repos:
     hooks:
       - id: isort
         args: ["--profile", "black", "--filter-files"]
--   repo: https://github.com/psf/black
-    rev: 24.4.2
-    hooks:
-      - id: black
-        args: [--line-length=100]
 default_language_version:
     python: python3.12
