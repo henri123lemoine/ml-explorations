@@ -76,12 +76,6 @@ class Whisper(TorchModel):
         model.processor = WhisperProcessor.from_pretrained(path)
         return model
 
-    def fit(self, train_data: DataLoader, val_data: DataLoader | None = None) -> None:
-        raise NotImplementedError("Training not implemented for Whisper model")
-
-    def evaluate(self, data: DataLoader) -> dict[str, float]:
-        raise NotImplementedError("Evaluation not implemented for Whisper model")
-
 
 class WhisperMLX(MLXModel[mx.array, mx.array, DataLoader]):
     """MLX-optimized Whisper model for Apple Silicon.
@@ -106,18 +100,6 @@ class WhisperMLX(MLXModel[mx.array, mx.array, DataLoader]):
             Dictionary containing transcription results
         """
         return mlx_whisper.transcribe(str(audio_path), path_or_hf_repo=self.model_name)["text"]
-
-    def __call__(self, x: mx.array) -> mx.array:
-        raise NotImplementedError("Direct model call not implemented")
-
-    def predict(self, x: mx.array) -> mx.array:
-        raise NotImplementedError("Direct prediction not implemented")
-
-    def fit(self, train_data: DataLoader, val_data: DataLoader | None = None) -> None:
-        raise NotImplementedError("Training not implemented")
-
-    def evaluate(self, data: DataLoader) -> dict[str, float]:
-        raise NotImplementedError("Evaluation not implemented")
 
 
 if __name__ == "__main__":

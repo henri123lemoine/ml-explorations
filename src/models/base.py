@@ -1,6 +1,6 @@
 import logging
 import pickle
-from abc import ABC, abstractmethod
+from abc import ABC
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -34,28 +34,23 @@ class ModelInterface[IN: Any, OUT: Any, DATA: Any](ABC):
         super().__init_subclass__()
         cls.registry[cls.__name__] = cls
 
-    @abstractmethod
     def predict(self, x: IN) -> OUT:
         """Make a prediction for the given input."""
         pass
 
-    @abstractmethod
     def fit(self, train_data: DATA, val_data: DATA | None = None) -> None:
         """Train the model on the given data."""
         pass
 
-    @abstractmethod
     def evaluate(self, data: DATA) -> dict[str, float]:
         """Evaluate model performance."""
         pass
 
-    @abstractmethod
     def save(self, path: Path) -> None:
         """Save model state to the given path."""
         pass
 
     @classmethod
-    @abstractmethod
     def load(cls, path: Path) -> "ModelInterface[IN, OUT, DATA]":
         """Load model state from the given path."""
         pass
@@ -72,7 +67,6 @@ class TorchBaseModel[IN: Tensor | dict[str, Tensor], OUT: Tensor | float, DATA](
         super().__init__()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    @abstractmethod
     def forward(self, x: IN) -> OUT:
         """Forward pass of the model."""
         pass
@@ -142,7 +136,6 @@ class MLXBaseModel[IN, OUT, DATA](ModelInterface[IN, OUT, DATA], nn.Module):
         # MLX automatically handles device placement
         self.device = "gpu" if str(mx.default_device()) == "gpu" else "cpu"
 
-    @abstractmethod
     def __call__(self, x: IN) -> OUT:
         """Forward pass of the model."""
         pass

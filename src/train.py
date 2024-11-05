@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-from src.models.base import Model
+from src.models.base import TorchModel
 
 
 class EarlyStopping:
@@ -29,7 +29,7 @@ class EarlyStopping:
 
 
 def train_model(
-    model,
+    model: TorchModel,
     train_loader: DataLoader,
     val_loader: DataLoader,
     criterion=None,
@@ -195,7 +195,7 @@ def train_model(
 
 
 def validate_model(
-    model: Model,
+    model: TorchModel,
     val_loader: DataLoader,
     device: str,
 ) -> dict:

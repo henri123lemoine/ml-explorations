@@ -4,7 +4,6 @@ from typing import Generator
 
 import torch
 from torch import Tensor
-from torch.utils.data import DataLoader
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -83,12 +82,6 @@ class QwenModel(TorchModel):
 
         yield from streamer
         thread.join()
-
-    def fit(self, train_data: DataLoader, val_data: DataLoader | None = None) -> None:
-        raise NotImplementedError("Training not implemented for Qwen model")
-
-    def evaluate(self, data: DataLoader) -> dict[str, float]:
-        raise NotImplementedError("Evaluation not implemented for Qwen model")
 
 
 if __name__ == "__main__":

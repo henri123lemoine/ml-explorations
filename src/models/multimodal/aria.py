@@ -37,15 +37,6 @@ class AriaModel(Model):
         else:
             return self._generate_non_stream(inputs)
 
-    def fit(self, X: Any, y: Any):
-        raise NotImplementedError("Training not implemented for Aria model yet")
-
-    def predict(self, X: Any) -> Any:
-        raise NotImplementedError("Predict method not implemented for Aria model")
-
-    def evaluate(self, X: Any, y: Any) -> dict[str, float]:
-        raise NotImplementedError("Evaluate method not implemented for Aria model")
-
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
 
