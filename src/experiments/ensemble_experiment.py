@@ -264,7 +264,7 @@ def plot_ensemble_analysis(histories, models, train_loader, test_loader, val_loa
     """Comprehensive visualization of ensemble performance."""
 
     # Set up the figure with a grid layout
-    plt.style.use("seaborn")
+    # plt.style.use("seaborn")
     fig = plt.figure(figsize=(20, 15))
     gs = GridSpec(2, 2, figure=fig)
 
