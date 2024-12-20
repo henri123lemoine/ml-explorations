@@ -7,12 +7,11 @@ requires-python = ">=3.12"
 dependencies = [
     "accelerate>=1.1.0",
     "albumentations>=1.4.21",
-    "anthropic>=0.34.2",
+    "anthropic>=0.42.0",
     "bertviz>=1.4.0",
     "bitsandbytes==0.42.0",
     "bs4>=0.0.2",
     "datasets>=3.1.0",
-    "ell-ai[all]>=0.0.14",
     "gymnasium[box2d]>=1.0.0",
     "huggingface-hub>=0.26.2",
     "imageio>=2.36.0",
@@ -21,15 +20,12 @@ dependencies = [
     "llvmlite",
     "markdownify>=0.13.1",
     "matplotlib>=3.9.2",
-    "mlx-lm>=0.19.2",
-    "mlx-whisper",
-    "moviepy>=1.0.3",
-    "numpy==2.0",
+    "moviepy>=2.1.1",
+    "numpy==2.2.0",
     "openai>=1.53.0",
     "opencv-python>=4.10.0.84",
     "pandas>=2.2.3",
     "pathlib>=1.0.1",
-    "pillow>=10.4.0",
     "pytest>=8.3.3",
     "python-dotenv",
     "regex>=2024.9.11",
@@ -54,3 +50,8 @@ dependencies = [
 
 # [tool.uv.sources]
 # stable-baselines3 = { git = "https://github.com/DLR-RM/stable-baselines3" }
+
+[project.optional-dependencies]
+whisper = ["mlx-whisper", "mlx-lm>=0.19.2"]
+bike = ["pillow>=10.4.0"]
+# ell = ["ell-ai[all]>=0.0.15"]
