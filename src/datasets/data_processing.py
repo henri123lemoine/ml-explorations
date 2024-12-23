@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 import numpy as np
@@ -8,8 +7,6 @@ from torch.utils.data import DataLoader
 from datasets.image.bicycle import BicycleDataset
 from src.config import DatasetConfig
 from src.datasets.utils.augmentation import TrainTransform
-
-logger = logging.getLogger(__name__)
 
 
 def add_bias_term(X):

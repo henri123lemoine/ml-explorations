@@ -1,4 +1,3 @@
-import logging
 import re
 from pathlib import Path
 
@@ -7,9 +6,6 @@ from markdownify import markdownify
 
 from ..extractors.web import WebPageExtractor
 from .base import TextDataset
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 
 def hpmor_processor(content: str) -> str:

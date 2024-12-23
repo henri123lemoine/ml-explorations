@@ -1,15 +1,14 @@
 import functools
 import hashlib
 import json
-import logging
 import os
 import pickle
 from pathlib import Path
 from typing import Any, Callable, Union
 
-from src.settings import CACHE_PATH
+from loguru import logger
 
-logger = logging.getLogger(__name__)
+from src.settings import CACHE_PATH
 
 
 class CacheError(Exception):

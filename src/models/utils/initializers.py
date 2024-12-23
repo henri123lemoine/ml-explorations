@@ -1,10 +1,7 @@
-import logging
 from abc import ABC, abstractmethod
 
 import numpy as np
 import numpy.typing as npt
-
-logger = logging.getLogger(__name__)
 
 
 class Initializer(ABC):

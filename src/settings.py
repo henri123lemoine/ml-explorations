@@ -1,4 +1,3 @@
-import logging.config
 import os
 from datetime import datetime
 from pathlib import Path
@@ -7,6 +6,8 @@ import anthropic
 import openai
 import replicate
 from dotenv import load_dotenv
+
+from src.logging import setup_logging
 
 load_dotenv()
 
@@ -36,21 +37,4 @@ REPLICATE_API_KEY = os.environ.get("REPLICATE_API_KEY")
 REPLICATE_CLIENT = replicate_client = replicate.Client(api_token=REPLICATE_API_KEY)
 
 # Logging
-
-LOGGING_CONFIG = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
-    },
-    "handlers": {
-        "default": {
-            "level": "INFO",
-            "formatter": "standard",
-            "class": "logging.StreamHandler",
-        },
-    },
-    "loggers": {"": {"handlers": ["default"], "level": "INFO", "propagate": True}},
-}
-
-logging.config.dictConfig(LOGGING_CONFIG)
+setup_logging(debug=True)

@@ -1,4 +1,3 @@
-import logging
 import pickle
 from abc import ABC
 from pathlib import Path
@@ -12,8 +11,6 @@ from torch import Tensor
 from torch.utils.data import DataLoader
 
 from src.settings import CACHE_PATH
-
-logger = logging.getLogger(__name__)
 
 
 class ModelInterface[IN: Any, OUT: Any, DATA: Any](ABC):

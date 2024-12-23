@@ -1,8 +1,8 @@
-import logging
 from typing import Type
 
 import torch
 import torch.nn as nn
+from loguru import logger
 from torch import Tensor
 from torch.utils.data import DataLoader
 
@@ -12,8 +12,6 @@ from src.models.utils.activations import ReLU
 from src.models.utils.initializers import Initializer, Xavier
 from src.models.utils.optimizers import Adam
 from src.models.utils.schedulers import CosineAnnealing
-
-logger = logging.getLogger(__name__)
 
 
 class MLPLayer(nn.Module):

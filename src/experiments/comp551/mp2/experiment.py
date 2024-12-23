@@ -1,4 +1,3 @@
-import logging
 import os
 import pickle
 import sys
@@ -11,6 +10,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.models as models
+from loguru import logger
 
 from src.config import load_config
 from src.datasets.retrieval import load_dataset
@@ -19,9 +19,6 @@ from src.models.legacy.MLP import MLP
 from src.models.utils import *
 from src.settings import CACHE_PATH
 from src.visualization import plot
-
-logging.basicConfig(level=logging.INFO, format="[%(asctime)s - %(levelname)s]: %(message)s")
-logger = logging.getLogger(__name__)
 
 MP2_PATH = Path(__file__).resolve().parent
 DATA_PATH = MP2_PATH / "data"

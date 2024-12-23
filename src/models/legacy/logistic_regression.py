@@ -1,5 +1,3 @@
-import logging
-
 import numpy as np
 
 from src.datasets.data_processing import (
@@ -10,8 +8,6 @@ from src.datasets.data_processing import (
 )
 from src.models.base import Model
 from src.models.utils.optimizers import gradient_descent, stochastic_gradient_descent
-
-logger = logging.getLogger(__name__)
 
 
 class LogisticRegression(Model):

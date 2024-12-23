@@ -1,17 +1,15 @@
-import logging
 from dataclasses import dataclass
 
 import numpy as np
 import torch
 import torchvision
 import torchvision.transforms as transforms
+from loguru import logger
 from torch.utils.data import DataLoader, IterableDataset
 
 import datasets
 from src.datasets.data_processing import dataset_stats
 from src.settings import DATASETS_PATH
-
-logger = logging.getLogger(__name__)
 
 
 class NumpyDataLoader(IterableDataset):

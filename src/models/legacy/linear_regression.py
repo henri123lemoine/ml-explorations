@@ -1,12 +1,8 @@
-import logging
-
 import numpy as np
 
 from src.datasets.data_processing import add_bias_term
 from src.models.base import Model
 from src.models.utils.optimizers import gradient_descent, stochastic_gradient_descent
-
-logger = logging.getLogger(__name__)
 
 
 class LinearRegression(Model):

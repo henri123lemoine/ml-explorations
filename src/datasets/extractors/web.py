@@ -1,4 +1,3 @@
-import logging
 import re
 import time
 from pathlib import Path
@@ -10,11 +9,10 @@ import requests
 import seaborn as sns
 import torch
 from bs4 import BeautifulSoup
+from loguru import logger
 from tqdm import tqdm
 
 from src.cache import cache
-
-logger = logging.getLogger(__name__)
 
 
 class DatasetExtractor:

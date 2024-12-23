@@ -1,7 +1,7 @@
-import logging
 from pathlib import Path
 
 import torch
+from loguru import logger
 from torch import nn
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
@@ -14,8 +14,6 @@ from transformers import (
 
 from src.datasets.retrieval import DataPoint
 from src.models.base import Model
-
-logger = logging.getLogger(__name__)
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

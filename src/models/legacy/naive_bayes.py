@@ -1,15 +1,12 @@
-import logging
 from functools import reduce
 
 import numpy as np
+from loguru import logger
 from scipy import sparse
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 from src.datasets.retrieval import DataPoint
 from src.models.base import Model
-
-logger = logging.getLogger(__name__)
-
 
 # ------------------------------------ MODEL -----------------------------------
 

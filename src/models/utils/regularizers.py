@@ -1,9 +1,6 @@
-import logging
 from abc import ABC, abstractmethod
 
 import numpy as np
-
-logger = logging.getLogger(__name__)
 
 
 class Regularizer(ABC):

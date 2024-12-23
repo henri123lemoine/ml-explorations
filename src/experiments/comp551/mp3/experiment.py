@@ -1,4 +1,3 @@
-import logging
 import random
 import sys
 import time
@@ -10,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import yaml
+from loguru import logger
 from matplotlib.colors import LogNorm
 from sklearn.metrics import confusion_matrix
 from torch.optim import Adam, AdamW, Optimizer
@@ -38,12 +38,6 @@ PLOTS_PATH.mkdir(parents=True, exist_ok=True)
 
 with open(MP3_PATH / "config.yaml", "r") as file:
     config = yaml.safe_load(file)
-logging_config = config.get("logging_config", {})
-logging.basicConfig(
-    level=getattr(logging, logging_config.get("level", "INFO")),
-    format=logging_config.get("format", "[%(asctime)s - %(levelname)s]: %(message)s"),
-)
-logger = logging.getLogger(__name__)
 
 # we previously had be automatically populating a context dict with all
 # globals(), but this was a repeated source of bugs. From now on, if you want to

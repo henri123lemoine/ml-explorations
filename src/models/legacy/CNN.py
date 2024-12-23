@@ -1,15 +1,13 @@
-import logging
 from typing import List, Optional, Tuple, Type
 
 import torch
 import torch.nn as nn
+from loguru import logger
 from torch import Tensor
 from torch.utils.data import DataLoader
 
 from src.metrics import accuracy
 from src.models.base import TorchModel
-
-logger = logging.getLogger(__name__)
 
 
 class ConvBlock(nn.Module):

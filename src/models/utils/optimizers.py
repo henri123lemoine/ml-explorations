@@ -1,11 +1,8 @@
-import logging
 from abc import ABC, abstractmethod
 
 import numpy as np
 
 from src.datasets.data_processing import add_bias_term
-
-logger = logging.getLogger(__name__)
 
 
 class Optimizer(ABC):
