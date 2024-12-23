@@ -18,6 +18,7 @@ dependencies = [
     "importlib-metadata>=8.5.0",
     "ipykernel>=6.29.5",
     "llvmlite",
+    "loguru>=0.7.3",
     "markdownify>=0.13.1",
     "matplotlib>=3.9.2",
     "moviepy>=2.1.1",
