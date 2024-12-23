@@ -4,16 +4,14 @@ from typing import Any, Callable
 import numpy as np
 import torch
 from PIL import Image
-from torch.utils.data import Dataset
 from tqdm.auto import tqdm
 
 from datasets import load_dataset
 from src.config import DatasetConfig
+from src.datasets.image.base import ImageDataset
 
-# from src.datasets.image.base import ImageDataset  # TODO: Use this instead
 
-
-class BicycleDataset(Dataset):  # ImageDataset
+class BicycleDataset(ImageDataset):
     """Dataset for bicycle classification with efficient two-level caching."""
 
     def __init__(
@@ -28,6 +26,10 @@ class BicycleDataset(Dataset):  # ImageDataset
         self.transform_fn = transform_fn
         self.split = split
         self.images, self.labels = self._load_or_create_dataset()
+
+    def _load_data(self) -> tuple[list[Image.Image], list[int]]:
+        """Implementation of the abstract method from BaseDataset"""
+        return self._load_or_create_dataset()
 
     def _get_cache_paths(self) -> dict[str, Path]:
         """Get paths for both metadata and processed dataset caches."""
