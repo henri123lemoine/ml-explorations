@@ -4,7 +4,7 @@ from pathlib import Path
 
 from markdownify import markdownify
 
-from src.datasets.utils import WebPageExtractor
+from src.datasets.base import WebPageExtractor
 from src.settings import DATASETS_PATH
 
 HPMOR_EXP_PATH = Path(__file__).resolve().parent
