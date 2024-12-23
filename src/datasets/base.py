@@ -12,7 +12,7 @@ import torch
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 
-from cache import cache
+from src.cache import cache
 
 logger = logging.getLogger(__name__)
 
