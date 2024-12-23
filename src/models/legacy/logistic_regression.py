@@ -1,13 +1,13 @@
 import numpy as np
 
-from src.datasets.data_processing import (
-    add_bias_term,
-    one_hot_decode,
-    one_hot_encode,
-    softmax,
-)
+from src.datasets.data_processing import add_bias_term, one_hot_decode, one_hot_encode
 from src.models.base import Model
 from src.models.utils.optimizers import gradient_descent, stochastic_gradient_descent
+
+
+def softmax(z):
+    exp_z = np.exp(z - np.max(z, axis=1, keepdims=True))  # Numerical stability
+    return exp_z / np.sum(exp_z, axis=1, keepdims=True)
 
 
 class LogisticRegression(Model):

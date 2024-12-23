@@ -14,11 +14,6 @@ def add_bias_term(X):
     return np.c_[np.ones((X.shape[0], 1)), X]
 
 
-def softmax(z):
-    exp_z = np.exp(z - np.max(z, axis=1, keepdims=True))  # Numerical stability
-    return exp_z / np.sum(exp_z, axis=1, keepdims=True)
-
-
 def one_hot_encode(y, classes):
     return np.eye(len(classes))[np.searchsorted(classes, y)]
 
