@@ -1,4 +1,8 @@
 from pathlib import Path
+from typing import Any
+
+import numpy as np
+from PIL import Image
 
 from src.datasets.base import BaseDataset
 
@@ -16,9 +20,22 @@ class ImageDataset(BaseDataset):
         self.image_processor = image_processor
         super().__init__(cache_dir, split, transform)
 
-    def _ensure_rgb(self, image):
-        """Your existing _ensure_rgb implementation"""
-        pass
+    def _ensure_rgb(self, image: Any) -> np.ndarray:
+        """Convert image to RGB format."""
+        if isinstance(image, np.ndarray):
+            if len(image.shape) == 2:
+                return np.stack([image] * 3, axis=-1)
+            elif len(image.shape) == 3:
+                if image.shape[-1] == 4:
+                    return image[..., :3]
+                elif image.shape[-1] == 3:
+                    return image
+                elif image.shape[-1] == 1:
+                    return np.repeat(image, 3, axis=-1)
+        elif isinstance(image, Image.Image):
+            return np.array(image.convert("RGB"))
+
+        raise ValueError(f"Unsupported image format: {type(image)}")
 
     def __getitem__(self, idx):
         """Common image processing logic"""

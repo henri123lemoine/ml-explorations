@@ -1,12 +1,5 @@
-from typing import Any
-
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
-
-from datasets.image.bicycle import BicycleDataset
-from src.config import DatasetConfig
-from src.datasets.utils.augmentation import TrainTransform
 
 
 def add_bias_term(X):
@@ -66,35 +59,3 @@ def dataset_stats(data_loader):
 
     std = torch.sqrt(M2 / nb_samples)
     return mean.numpy(), std.numpy()
-
-
-# TODO: Make this generic
-def create_dataloaders(
-    processor: Any,
-    config: DatasetConfig | None = None,
-) -> tuple[DataLoader, DataLoader]:
-    """Create train and validation dataloaders with augmentation."""
-    config = config or DatasetConfig()
-
-    train_transform = TrainTransform() if config.use_augmentation else None
-
-    train_dataset = BicycleDataset(
-        processor, split="train", config=config, transform_fn=train_transform
-    )
-    val_dataset = BicycleDataset(processor, split="val", config=config)
-
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=config.batch_size,
-        shuffle=True,
-        num_workers=config.num_workers,
-    )
-
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=config.batch_size,
-        shuffle=False,
-        num_workers=config.num_workers,
-    )
-
-    return train_loader, val_loader

@@ -4,11 +4,13 @@ from typing import Any, Callable
 import numpy as np
 import torch
 from PIL import Image
+from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
 from datasets import load_dataset
 from src.config import DatasetConfig
 from src.datasets.image.base import ImageDataset
+from src.datasets.utils.augmentation import TrainTransform
 
 
 class BicycleDataset(ImageDataset):
@@ -171,23 +173,6 @@ class BicycleDataset(ImageDataset):
             f"\nNon-bicycle images: {len(images) - n_pos}\n"
         )
 
-    def _ensure_rgb(self, image: Any) -> np.ndarray:
-        """Convert image to RGB format."""
-        if isinstance(image, np.ndarray):
-            if len(image.shape) == 2:
-                return np.stack([image] * 3, axis=-1)
-            elif len(image.shape) == 3:
-                if image.shape[-1] == 4:
-                    return image[..., :3]
-                elif image.shape[-1] == 3:
-                    return image
-                elif image.shape[-1] == 1:
-                    return np.repeat(image, 3, axis=-1)
-        elif isinstance(image, Image.Image):
-            return np.array(image.convert("RGB"))
-
-        raise ValueError(f"Unsupported image format: {type(image)}")
-
     def __len__(self) -> int:
         return len(self.labels)
 
@@ -207,3 +192,35 @@ class BicycleDataset(ImageDataset):
         processed = {k: v.squeeze(0) for k, v in processed.items()}
 
         return processed, label
+
+
+# TODO: Make this generic
+def create_dataloaders(
+    processor: Any,
+    config: DatasetConfig | None = None,
+) -> tuple[DataLoader, DataLoader]:
+    """Create train and validation dataloaders with augmentation."""
+    config = config or DatasetConfig()
+
+    train_transform = TrainTransform() if config.use_augmentation else None
+
+    train_dataset = BicycleDataset(
+        processor, split="train", config=config, transform_fn=train_transform
+    )
+    val_dataset = BicycleDataset(processor, split="val", config=config)
+
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=config.batch_size,
+        shuffle=True,
+        num_workers=config.num_workers,
+    )
+
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=config.batch_size,
+        shuffle=False,
+        num_workers=config.num_workers,
+    )
+
+    return train_loader, val_loader
