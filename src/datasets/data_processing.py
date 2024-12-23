@@ -5,8 +5,8 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
+from datasets.image.bicycle import BicycleDataset
 from src.config import DatasetConfig
-from src.datasets.bicycle import BicycleDataset
 from src.datasets.utils.augmentation import TrainTransform
 
 logger = logging.getLogger(__name__)

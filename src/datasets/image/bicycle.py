@@ -10,8 +10,10 @@ from tqdm.auto import tqdm
 from datasets import load_dataset
 from src.config import DatasetConfig
 
+# from src.datasets.image.base import ImageDataset  # TODO: Use this instead
 
-class BicycleDataset(Dataset):
+
+class BicycleDataset(Dataset):  # ImageDataset
     """Dataset for bicycle classification with efficient two-level caching."""
 
     def __init__(
