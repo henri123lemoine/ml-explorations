@@ -1,16 +1,30 @@
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
 import numpy as np
 import torch
 from PIL import Image
-from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
 from datasets import load_dataset
-from src.config import DatasetConfig
 from src.datasets.image.base import ImageDataset
-from src.datasets.utils.augmentation import TrainTransform
+from src.settings import DATASETS_PATH
+
+
+@dataclass
+class DatasetConfig:
+    """Configuration for dataset creation."""
+
+    cache_dir: Path = DATASETS_PATH
+    max_images: int = 5000
+    neg_ratio: float = 1.0
+    train_ratio: float = 0.8
+    random_seed: int = 42
+    batch_size: int = 32
+    num_workers: int = 4
+    bicycle_label: int = 2  # COCO dataset bicycle class label
+    use_augmentation: bool = True
 
 
 class BicycleDataset(ImageDataset):
@@ -192,35 +206,3 @@ class BicycleDataset(ImageDataset):
         processed = {k: v.squeeze(0) for k, v in processed.items()}
 
         return processed, label
-
-
-# TODO: Make this generic
-def create_dataloaders(
-    processor: Any,
-    config: DatasetConfig | None = None,
-) -> tuple[DataLoader, DataLoader]:
-    """Create train and validation dataloaders with augmentation."""
-    config = config or DatasetConfig()
-
-    train_transform = TrainTransform() if config.use_augmentation else None
-
-    train_dataset = BicycleDataset(
-        processor, split="train", config=config, transform_fn=train_transform
-    )
-    val_dataset = BicycleDataset(processor, split="val", config=config)
-
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=config.batch_size,
-        shuffle=True,
-        num_workers=config.num_workers,
-    )
-
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=config.batch_size,
-        shuffle=False,
-        num_workers=config.num_workers,
-    )
-
-    return train_loader, val_loader

@@ -1,6 +1,6 @@
 from transformers import ViTForImageClassification, ViTImageProcessor
 
-from src.config import DatasetConfig, PretrainedConfig
+from datasets.utils.config import DatasetConfig, PretrainedConfig
 from src.datasets.image.bicycle import create_dataloaders
 from src.models.image.base import PretrainedImageClassifier
 from src.settings import MODELS_PATH

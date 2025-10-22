@@ -12,7 +12,7 @@ import torch.optim as optim
 import torchvision.models as models
 from loguru import logger
 
-from src.config import load_config
+from datasets.utils.config import load_config
 from src.datasets.retrieval import load_dataset
 from src.models.legacy.CNN import CNN
 from src.models.legacy.MLP import MLP

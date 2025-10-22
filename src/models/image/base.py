@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from src.config import PretrainedConfig
+from datasets.utils.config import PretrainedConfig
 from src.models.base import Model
 
 
